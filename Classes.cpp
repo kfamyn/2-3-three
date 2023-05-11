@@ -91,7 +91,7 @@ ReadIterator::ReadIterator(const TwoThreeTree& tree) {
 	ptr = tree.root;	//Поиск крайнего левого элемента
 	stack.push(std::make_pair(ptr, 1));
 	while (ptr->getDown()) {
-		stack.push(std::make_pair(ptr, 2));
+		stack.push(std::make_pair(ptr, LEFT));
 		ptr = ptr->getDown();
 	}
 };
@@ -112,15 +112,15 @@ ReadIterator& ReadIterator::operator++() {
 			ptr = stack.top().first;
 			stack.pop();
 			switch (a) {
-			case 1:
+			case ROOT:
 				ptr = NULLNODE;	//Вернулись к корню, конец
 				return (*this);
 				break;
-			case 2:
+			case LEFT:
 				stack.push(std::make_pair(ptr, 3));	//Спуск по средней ветке
 				ptr = ptr->getNext()->getDown();
 				while (ptr->getDown()) {
-					stack.push(std::make_pair(ptr, 2));
+					stack.push(std::make_pair(ptr, LEFT));
 					ptr = ptr->getDown();
 				}
 				return (*this);
@@ -130,7 +130,7 @@ ReadIterator& ReadIterator::operator++() {
 					stack.push(std::make_pair(ptr, 4));	//Спуск по правой (если есть)
 					ptr = ptr->getNext()->getNext()->getDown();
 					while (ptr->getDown()) {
-						stack.push(std::make_pair(ptr, 2));
+						stack.push(std::make_pair(ptr, LEFT));
 						ptr = ptr->getDown();
 					}
 					return (*this);
@@ -149,7 +149,7 @@ ReadIterator& ReadIterator::operator++() {
 std::pair<ReadIterator, bool> TwoThreeTree::insert(int k, ReadIterator where)
 {
 	Node* temporaryRootPointer, * nodePointerP, * nodePointerQ;
-	int direction = 1, up = 0;
+	int direction = ROOT, up = 0;
 	std::stack<std::pair<Node*, int>> stack;
 	//===== Инициализация =====
 	temporaryRootPointer = root;
@@ -159,7 +159,7 @@ std::pair<ReadIterator, bool> TwoThreeTree::insert(int k, ReadIterator where)
 		return std::make_pair(ReadIterator(root, std::move(stack)), true);
 	}
 	else {		//Поиск по дереву
-		stack.push(std::make_pair(root, 1));	// Создание и инициализация стека
+		stack.push(std::make_pair(root, ROOT));	// Создание и инициализация стека
 										//===== Поиск места вставки =====
 		while (direction) {
 			if ((k == temporaryRootPointer->key) || //Проверка на совпадение значений
@@ -246,10 +246,10 @@ std::pair<ReadIterator, bool> TwoThreeTree::insert(int k, ReadIterator where)
 			nodePointerP = stack.top().first;
 			direction = stack.top().second;
 			stack.pop();	//nodePointerP-> узел с четырьмя сыновьями
-			if (direction != 1) temporaryRootPointer = stack.top().first;	//temporaryRootPointer-> управляющий узел для "nodePointerP->"
+			if (direction != ROOT) temporaryRootPointer = stack.top().first;	//temporaryRootPointer-> управляющий узел для "nodePointerP->"
 			nodePointerQ = new Node(nodePointerP->next->next->next->key);
 			switch (direction) {
-			case 1:	//Корневой узел дерева: root == nodePointerP == temporaryRootPointer
+			case ROOT:	//Корневой узел дерева: root == nodePointerP == temporaryRootPointer
 				up = 0;
 				height++;	//Увеличение высоты дерева
 				root = temporaryRootPointer = new Node(root->next->key); //Создание двойного управляющего узла
@@ -286,7 +286,7 @@ std::pair<ReadIterator, bool> TwoThreeTree::insert(int k, ReadIterator where)
 int TwoThreeTree::erase(int k)   //Удаление (единственного) элемента из 2-3-дерева
 {
 	Node* temporaryRootPointer(root), * nodePointerP(nullptr);
-	int direction = 1, up = 0, result = 0;
+	int direction = ROOT, up = 0, result = 0;
 	if (temporaryRootPointer) {   //Дерево не пусто
 		if (temporaryRootPointer->next) {
 			if (temporaryRootPointer->next->next) {
@@ -299,7 +299,7 @@ int TwoThreeTree::erase(int k)   //Удаление (единственного)
 			if (k > temporaryRootPointer->key) return result;
 		// //k больше максимума, выход
 		std::stack<std::pair<Node*, int>> stack;
-		stack.push(std::make_pair(temporaryRootPointer, 1));   // Создание и инициализация стека
+		stack.push(std::make_pair(temporaryRootPointer, ROOT));   // Создание и инициализация стека
 		while (1) {
 			if (temporaryRootPointer->down) { //Узел — не лист, идём вниз
 				if (k < temporaryRootPointer->key) { //Идём влево
@@ -702,7 +702,7 @@ int main()
 			A.display();
 			B.display();*/
 			std::cout << "Результат E = (A^B-C) U D ∩ E))" << std::endl;
-			E = A & B;
+			E = A | B;
 			E.display();
 			/*ReadIterator readIterator(A);
 			while (readIterator.ptr != NULLNODE) {
