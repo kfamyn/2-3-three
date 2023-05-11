@@ -3,14 +3,15 @@
 enum genSettings { genPower = 20, genMaxNum = 99 };
 struct ReadIterator;
 class TwoThreeTree;
+class Node;
 
 class Node {	//Узел дерева
 private:
-	void display(int, int);
-	void out(int, int);
 	int key;		    //Ключ
 	Node* next, * down;
 	void erase();
+	void display(int, int);
+	void out(int, int);
 	friend class TwoThreeTree;
 public:
 	Node() : down(nullptr), next(nullptr) {}
@@ -23,21 +24,15 @@ public:
 	//			if(next) delete next; };
 };
 
-Node sentinel;
-Node* NULLNODE = &sentinel;
-
-using StackPairs = std::stack<std::pair<Node*, int>>;
-
 struct ReadIterator : public std::iterator<std::forward_iterator_tag, int> {
 	Node* ptr;
-	StackPairs stack;
+	std::stack<std::pair<Node*, int>> stack;
 	ReadIterator(const TwoThreeTree& tree);
 	ReadIterator(Node* p = nullptr) : ptr(p) { }
-	ReadIterator(Node* p, const StackPairs&& St) : ptr(p), stack(std::move(St)) {}
+	ReadIterator(Node* p, const std::stack<std::pair<Node*, int>>&& St) : ptr(p), stack(std::move(St)) {}
 	bool operator == (const ReadIterator& other) const { return ptr == other.ptr; }
 	bool operator != (const ReadIterator& other) const { return !(*this == other); }
 	ReadIterator& operator++();
-
 	ReadIterator operator++(int) { ReadIterator temp(*this); ++* this; return temp; }
 	pointer operator->() const { return &ptr->getKeyReference(); }
 	reference operator*() const { return ptr->getKeyReference(); }
@@ -63,16 +58,4 @@ public:
 	~TwoThreeTree();
 };
 
-ReadIterator::ReadIterator(const TwoThreeTree& tree) {
-	if (!tree.root) {
-		ptr = NULLNODE;
-		return;//Дерево пусто, выход
-	}
-	ptr = tree.root;	//Поиск крайнего левого элемента
-	stack.push(std::make_pair(ptr, 1));
-	while (ptr->getDown()) {
-		stack.push(std::make_pair(ptr, 2));
-		ptr = ptr->getDown();
-	}
-};
 #endif

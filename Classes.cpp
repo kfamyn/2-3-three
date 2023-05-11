@@ -5,10 +5,98 @@
 #include <stack>
 #include "Classes.h"
 
-using std::cin;
-using std::cout;
-using std::endl;
+//Имитация пустого узла для итератора чтения (защита от обращения к пустому узлу)
+Node sentinel;
+Node* NULLNODE = &sentinel;
+//***********************************************************************
+//Параметры вывода на экран
+const int FIRSTROW = 0, FIRSTCOL = 40,
+MAXCOL = 120, OFFSET[] = { 40, 24, 10, 4, 1 },
+MAXROW = FIRSTROW + 18,
+MAXOUT = FIRSTROW + 14, SHIFT = 2;
+char SCREEN[MAXROW * MAXCOL];
+int row = 0, col = 0;
+//***********************************************************************
+//Функции работы с экраном
+void gotoxy(int c, int r) { row = r, col = c; }
 
+void clrscr()
+{
+	for (auto& x : SCREEN) x = '.';
+}
+
+void showscr()
+{
+	for (int i = 0; i < MAXROW; i++)
+		for (int j = 0; j < MAXCOL; j++)
+			if (SCREEN[i * MAXCOL + j] && SCREEN[i * MAXCOL + j] != 'ю')
+				std::cout << SCREEN[i * MAXCOL + j];
+			else std::cout << ' ';
+	std::cout << std::endl;
+}
+//***********************************************************************
+void Node::erase() //удаление узла
+{
+	if (down) {
+		if (next->next) next->next->down->erase();
+		next->down->erase();
+		down->erase();
+	}
+	else {
+		if (next) {
+			if (next->next) delete next->next;
+			delete next;
+		}
+		delete this;
+	}
+}
+//***********************************************************************
+//Вывод узла на экран и обход
+void Node::display(int lvl, int col)
+{
+	int row = FIRSTROW + lvl * 4;
+	this->out(row, col);
+	if (down) {
+		down->display(lvl + 1, col - (OFFSET[lvl + 1]));
+		next->down->display(lvl + 1, col);
+		if ((next->next) && (next->next->down))
+			next->next->down->display(lvl + 1, col + (OFFSET[lvl + 1]));
+	}
+}
+//***********************************************************************
+//Вывод узла в массив screen в точку (x, y)
+void Node::out(int row, int col)
+{
+	if ((row > MAXROW) || (col < 1) || (col > MAXCOL)) return;
+	gotoxy(col, row);
+	if (row > MAXOUT) {
+		sprintf_s(SCREEN + row * MAXCOL + col, 4, "..."), col += 3;
+		return;
+	}
+	sprintf_s(SCREEN + row * MAXCOL + col, 4, "%1d ", key);
+	if (next) {
+		sprintf_s(SCREEN + (row + 1) * MAXCOL + col + 1, 4, "%1d ", next->key);
+		if (next->next)
+			sprintf_s(SCREEN + (row + 2) * MAXCOL + col + 2, 4, "%1d ", next->next->key);
+		else sprintf_s(SCREEN + (row + 2) * MAXCOL + col + 2, 4, "@  ");
+	}
+}
+//***********************************************************************
+//Постановка итератора чтения на дерево
+ReadIterator::ReadIterator(const TwoThreeTree& tree) {
+	if (!tree.root) {
+		ptr = NULLNODE;
+		return;//Дерево пусто, выход
+	}
+	ptr = tree.root;	//Поиск крайнего левого элемента
+	stack.push(std::make_pair(ptr, 1));
+	while (ptr->getDown()) {
+		stack.push(std::make_pair(ptr, 2));
+		ptr = ptr->getDown();
+	}
+};
+//***********************************************************************
+//Инкремент итератора чтения
 ReadIterator& ReadIterator::operator++() {
 	int a;
 	if (!ptr) { //Первое обращение?
@@ -56,7 +144,8 @@ ReadIterator& ReadIterator::operator++() {
 	}
 	return (*this);
 }
-
+//***********************************************************************
+//Вставка узла в дерево
 std::pair<ReadIterator, bool> TwoThreeTree::insert(int k, ReadIterator where)
 {
 	Node* temporaryRootPointer, * nodePointerP, * nodePointerQ;
@@ -193,7 +282,7 @@ std::pair<ReadIterator, bool> TwoThreeTree::insert(int k, ReadIterator where)
 		return std::make_pair(ReadIterator(temporaryRootPointer, std::move(stack)), true);
 	}
 }
-
+//***********************************************************************
 int TwoThreeTree::erase(int k)   //Удаление (единственного) элемента из 2-3-дерева
 {
 	Node* temporaryRootPointer(root), * nodePointerP(nullptr);
@@ -363,72 +452,12 @@ int TwoThreeTree::erase(int k)   //Удаление (единственного)
 	}
 	return result;
 }
-
-void Node::erase() //удаление узла
-{
-	if (down) {
-		if (next->next) next->next->down->erase();
-		next->down->erase();
-		down->erase();
-	}
-	else {
-		if (next) {
-			if (next->next) delete next->next;
-			delete next;
-		}
-		delete this;
-	}
-}
-//-----------------------------------------------------------------------
+//***********************************************************************
 TwoThreeTree :: ~TwoThreeTree()
 {
 	if (root) root->erase();
 }
 //***********************************************************************
-//Параметры вывода на экран
-const int FIRSTROW = 0, FIRSTCOL = 40,
-MAXCOL = 120, OFFSET[] = { 40, 24, 10, 4, 1 },
-MAXROW = FIRSTROW + 18,
-MAXOUT = FIRSTROW + 14, SHIFT = 2;
-char SCREEN[MAXROW * MAXCOL];
-int row = 0, col = 0;
-//***********************************************************************
-//Функции работы с экраном
-void gotoxy(int c, int r) { row = r, col = c; }
-//-----------------------------------------------------------------------
-void clrscr()
-{
-	for (auto& x : SCREEN) x = '.';
-}
-//-----------------------------------------------------------------------
-void showscr()
-{
-	for (int i = 0; i < MAXROW; i++)
-		for (int j = 0; j < MAXCOL; j++)
-			if (SCREEN[i * MAXCOL + j] && SCREEN[i * MAXCOL + j] != 'ю')
-				cout << SCREEN[i * MAXCOL + j];
-			else cout << ' ';
-	cout << endl;
-}
-//***********************************************************************
-//Вывод узла в массив screen в точку (x, y)
-void Node::out(int row, int col)
-{
-	if ((row > MAXROW) || (col < 1) || (col > MAXCOL)) return;
-	gotoxy(col, row);
-	if (row > MAXOUT) {
-		sprintf_s(SCREEN + row * MAXCOL + col, 4, "..."), col += 3;
-		return;
-	}
-	sprintf_s(SCREEN + row * MAXCOL + col, 4, "%1d ", key);
-	if (next) {
-		sprintf_s(SCREEN + (row + 1) * MAXCOL + col + 1, 4, "%1d ", next->key);
-		if (next->next)
-			sprintf_s(SCREEN + (row + 2) * MAXCOL + col + 2, 4, "%1d ", next->next->key);
-		else sprintf_s(SCREEN + (row + 2) * MAXCOL + col + 2, 4, "@  ");
-	}
-}
-//-----------------------------------------------------------------------
 //Вывод дерева на экран
 void TwoThreeTree::display()
 {
@@ -439,21 +468,6 @@ void TwoThreeTree::display()
 	else sprintf_s(SCREEN + row * MAXCOL + col, 9, "<Пусто!>");
 	showscr();
 }
-//-----------------------------------------------------------------------
-//Вывод узла на экран и обход
-void Node::display(int lvl, int col)
-{
-	int row = FIRSTROW + lvl * 4;
-	this->out(row, col);
-	if (down) {
-		down->display(lvl + 1, col - (OFFSET[lvl + 1]));
-		next->down->display(lvl + 1, col);
-		if ((next->next) && (next->next->down))
-			next->next->down->display(lvl + 1, col + (OFFSET[lvl + 1]));
-	}
-}
-//***********************************************************************
-//Вставка в 2-3 дерево
 //***********************************************************************
 //Создание 2-3 дерева по возрастающей последовательности
 int TwoThreeTree::build(int k)	// Приём возрастающей последовательности
@@ -640,16 +654,16 @@ int menu()
 {
 	int point;
 	do {
-		cin.clear();
-		cin.sync();
-		cout << "Выберите пункт меню" << endl;
-		cout << "1 - Сгенерировать дерево" << endl;
-		cout << "0 - Выход" << endl;
-		cout << ">";
-		cin >> point;
-		if (cin.fail())
-			cout << "Что-то пошло не так, выберите пункт меню повторно" << endl;
-	} while (cin.fail());
+		std::cin.clear();
+		std::cin.sync();
+		std::cout << "Выберите пункт меню" << std::endl;
+		std::cout << "1 - Сгенерировать дерево" << std::endl;
+		std::cout << "0 - Выход" << std::endl;
+		std::cout << ">";
+		std::cin >> point;
+		if (std::cin.fail())
+			std::cout << "Что-то пошло не так, выберите пункт меню повторно" << std::endl;
+	} while (std::cin.fail());
 	return point;
 }
 
@@ -665,13 +679,13 @@ int main()
 		{
 		case 1:
 			A.genSet(); B.genSet(); C.genSet(); D.genSet();
-			//cout << "Сгенерированные множества" << endl;
+			//std::cout << "Сгенерированные множества" << std::endl;
 			break;
 		case 0:
-			cout << "End" << endl;
+			std::cout << "End" << std::endl;
 			break;
 		default:
-			cout << "Такого пункта не существует, повторите ввод!" << endl;
+			std::cout << "Такого пункта не существует, повторите ввод!" << std::endl;
 		}
 		if (pause == 1)
 		{
@@ -687,16 +701,16 @@ int main()
 			B.erase(54);
 			A.display();
 			B.display();*/
-			cout << "Результат E = (A^B-C) U D ∩ E))" << endl;
+			std::cout << "Результат E = (A^B-C) U D ∩ E))" << std::endl;
 			E = A & B;
 			E.display();
 			/*ReadIterator readIterator(A);
 			while (readIterator.ptr != NULLNODE) {
-				std::cout << *readIterator << " ";
+				std::std::cout << *readIterator << " ";
 				readIterator++;
 			}*/
-			cout << "Для возврата в меню введите любое число, для выхода 0: ";
-			cin >> pause;
+			std::cout << "Для возврата в меню введите любое число, для выхода 0: ";
+			std::cin >> pause;
 		}
 	} while (pause);
 	return 0;
