@@ -716,6 +716,11 @@ int main()
 			cout << "Результат E = (A^B-C) U D ∩ E))" << endl;
 			E = A | B;
 			E.display();
+			/*ReadIterator readIterator(A);
+			while (readIterator.ptr != NIL) {
+				std::cout << *readIterator << " ";
+				readIterator++;
+			}*/
 			cout << "Для возврата в меню введите любое число, для выхода 0: ";
 			cin >> pause;
 		}
