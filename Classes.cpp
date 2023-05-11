@@ -9,33 +9,81 @@ using std::cin;
 using std::cout;
 using std::endl;
 
-pair<ReadIterator, bool> TwoThreeTree::insert(int k, ReadIterator where)
+ReadIterator& ReadIterator::operator++() {
+	int a;
+	if (!ptr) { //Первое обращение?
+		return *this; //Не работает без предварительной установки на дерево
+	}
+	else { //Текущий уже выдан
+		if (ptr->getNext()) { //Есть лист справа, шаг вправо
+			ptr = ptr->getNext();
+			return (*this);
+		}
+		while (true) {	//Поиск очередного листа
+			a = stack.top().second;	//Шаг вверх
+			ptr = stack.top().first;
+			stack.pop();
+			switch (a) {
+			case 1:
+				ptr = NULLNODE;	//Вернулись к корню, конец
+				return (*this);
+				break;
+			case 2:
+				stack.push(std::make_pair(ptr, 3));	//Спуск по средней ветке
+				ptr = ptr->getNext()->getDown();
+				while (ptr->getDown()) {
+					stack.push(std::make_pair(ptr, 2));
+					ptr = ptr->getDown();
+				}
+				return (*this);
+				break;
+			case 3:
+				if (ptr->getNext()->getNext()) {
+					stack.push(std::make_pair(ptr, 4));	//Спуск по правой (если есть)
+					ptr = ptr->getNext()->getNext()->getDown();
+					while (ptr->getDown()) {
+						stack.push(std::make_pair(ptr, 2));
+						ptr = ptr->getDown();
+					}
+					return (*this);
+				}
+				break;
+			case 4:
+				//ptr = nullptr;	//Обошли всё поддерево, подъём
+				break;
+			}
+		}
+	}
+	return (*this);
+}
+
+std::pair<ReadIterator, bool> TwoThreeTree::insert(int k, ReadIterator where)
 {
 	Node* temporaryRootPointer, * nodePointerP, * nodePointerQ;
 	int direction = 1, up = 0;
-	stack<pair<Node*, int>> stack;
+	std::stack<std::pair<Node*, int>> stack;
 	//===== Инициализация =====
 	temporaryRootPointer = root;
 	if (temporaryRootPointer == nullptr) {	// Дерево пусто
 		root = new Node(k);
 		height = 1;
-		return make_pair(ReadIterator(root, move(stack)), true);
+		return std::make_pair(ReadIterator(root, std::move(stack)), true);
 	}
 	else {		//Поиск по дереву
-		stack.push(make_pair(root, 1));	// Создание и инициализация стека
+		stack.push(std::make_pair(root, 1));	// Создание и инициализация стека
 										//===== Поиск места вставки =====
 		while (direction) {
 			if ((k == temporaryRootPointer->key) || //Проверка на совпадение значений
 				(temporaryRootPointer->next) && (k == temporaryRootPointer->next->key) ||
 				(temporaryRootPointer->next) && (temporaryRootPointer->next->next) && (k == temporaryRootPointer->next->next->key)) { //Элемент имеется
-				return make_pair(ReadIterator(temporaryRootPointer, move(stack)), false);		//Выход "вставка не понадобилась"
+				return std::make_pair(ReadIterator(temporaryRootPointer, std::move(stack)), false);		//Выход "вставка не понадобилась"
 			}
 			if (k < temporaryRootPointer->key) {
 				if (temporaryRootPointer->down) { //Идём вниз и влево
 					nodePointerP = temporaryRootPointer->next->next;
 					temporaryRootPointer = temporaryRootPointer->down;
-					if (nodePointerP) stack.push(make_pair(temporaryRootPointer, 4));
-					else stack.push(make_pair(temporaryRootPointer, 2));
+					if (nodePointerP) stack.push(std::make_pair(temporaryRootPointer, 4));
+					else stack.push(std::make_pair(temporaryRootPointer, 2));
 				}
 				else { //Новый лист слева (вставка справа и перенос данных)
 					nodePointerP = new Node(temporaryRootPointer->key);
@@ -55,8 +103,8 @@ pair<ReadIterator, bool> TwoThreeTree::insert(int k, ReadIterator where)
 				if (temporaryRootPointer->next->down) {//Идём вниз посередине
 					nodePointerP = temporaryRootPointer->next->next;
 					temporaryRootPointer = temporaryRootPointer->next->down;
-					if (nodePointerP) stack.push(make_pair(temporaryRootPointer, 5));
-					else stack.push(make_pair(temporaryRootPointer, 3));
+					if (nodePointerP) stack.push(std::make_pair(temporaryRootPointer, 5));
+					else stack.push(std::make_pair(temporaryRootPointer, 3));
 				}
 				else { // Новый лист посередине
 					nodePointerP = new Node(k);
@@ -70,7 +118,7 @@ pair<ReadIterator, bool> TwoThreeTree::insert(int k, ReadIterator where)
 				if (temporaryRootPointer->next->down) {     //Идём вниз посередине
 					temporaryRootPointer->next->key = k; 	//Меняем наибольший
 					temporaryRootPointer = temporaryRootPointer->next->down;
-					stack.push(make_pair(temporaryRootPointer, 3));
+					stack.push(std::make_pair(temporaryRootPointer, 3));
 				}
 				else {                   // Новый лист справа
 					nodePointerP = new Node(k);
@@ -83,7 +131,7 @@ pair<ReadIterator, bool> TwoThreeTree::insert(int k, ReadIterator where)
 					if (k > temporaryRootPointer->next->next->key)
 						temporaryRootPointer->next->next->key = k; //Меняем наибольший
 					temporaryRootPointer = temporaryRootPointer->next->next->down;
-					stack.push(make_pair(temporaryRootPointer, 6));
+					stack.push(std::make_pair(temporaryRootPointer, 6));
 				}
 				else {                     //Новый лист
 					nodePointerP = new Node(k);
@@ -142,7 +190,7 @@ pair<ReadIterator, bool> TwoThreeTree::insert(int k, ReadIterator where)
 			nodePointerP->next->next = nullptr; //Расцепление сыновей
 		}
 		//delete stack; 	//Уничтожение стека
-		return make_pair(ReadIterator(temporaryRootPointer, move(stack)), true);
+		return std::make_pair(ReadIterator(temporaryRootPointer, std::move(stack)), true);
 	}
 }
 
@@ -161,21 +209,21 @@ int TwoThreeTree::erase(int k)   //Удаление (единственного)
 		else
 			if (k > temporaryRootPointer->key) return result;
 		// //k больше максимума, выход
-		stack<pair<Node*, int>> stack;
-		stack.push(make_pair(temporaryRootPointer, 1));   // Создание и инициализация стека
+		std::stack<std::pair<Node*, int>> stack;
+		stack.push(std::make_pair(temporaryRootPointer, 1));   // Создание и инициализация стека
 		while (1) {
 			if (temporaryRootPointer->down) { //Узел — не лист, идём вниз
 				if (k < temporaryRootPointer->key) { //Идём влево
-					stack.push(make_pair(temporaryRootPointer, 1));
+					stack.push(std::make_pair(temporaryRootPointer, 1));
 					temporaryRootPointer = temporaryRootPointer->down;
 				}
 				else if (!(temporaryRootPointer->next->next) ||
 					k < temporaryRootPointer->next->next->key) { //Идём посередине
-					stack.push(make_pair(temporaryRootPointer, 2));
+					stack.push(std::make_pair(temporaryRootPointer, 2));
 					temporaryRootPointer = temporaryRootPointer->next->down;
 				}
 				else { //Идём вправо
-					stack.push(make_pair(temporaryRootPointer, 3));
+					stack.push(std::make_pair(temporaryRootPointer, 3));
 					temporaryRootPointer = temporaryRootPointer->next->next->down;
 				}
 			}
@@ -486,55 +534,6 @@ int TwoThreeTree::build(int k)	// Приём возрастающей после
 	return count;
 }
 //***********************************************************************
-//Обход 2-3 дерева
-Stack globalStack;	//Внешний стек для функции step
-int TwoThreeTree::step(Node*& nodePointerP, Stack& stack = globalStack) const
-{
-	int direction;
-	if (!nodePointerP) { //Первое обращение
-		if (!root) return 0; //Дерево пусто, выход
-		nodePointerP = root;	//Поиск крайнего левого элемента
-		stack.push(nodePointerP, 1);
-		while (nodePointerP->down) {
-			stack.push(nodePointerP, 2);
-			nodePointerP = nodePointerP->down;
-		}
-		return 1;
-	}
-	else { //Текущий уже выдан
-		if (nodePointerP->next) { //Есть лист справа, шаг вправо
-			nodePointerP = nodePointerP->next;
-			return 1;
-		}
-		while (true) {	//Поиск очередного листа
-			stack.pop(nodePointerP, direction);	//Шаг вверх
-			switch (direction) {
-			case 1:
-				return 0;	//Вернулись к корню, конец
-			case 2:
-				stack.push(nodePointerP, 3);	//Спуск по средней ветке
-				nodePointerP = nodePointerP->next->down;
-				while (nodePointerP->down) {
-					stack.push(nodePointerP, 2);
-					nodePointerP = nodePointerP->down;
-				}
-				return 1;
-			case 3:
-				if (nodePointerP->next->next) {
-					stack.push(nodePointerP, 4);	//Спуск по правой (если есть)
-					nodePointerP = nodePointerP->next->next->down;
-					while (nodePointerP->down) {
-						stack.push(nodePointerP, 2);
-						nodePointerP = nodePointerP->down;
-					}
-					return 1;
-				}
-			case 4:;	//Обошли всё поддерево, подъём
-			}
-		}
-	}
-}
-//***********************************************************************
 //Генерация 2-3 дерева
 void TwoThreeTree::genSet()
 {
@@ -626,10 +625,12 @@ const TwoThreeTree& TwoThreeTree::operator | (const TwoThreeTree& rightExp) cons
 
 const TwoThreeTree& TwoThreeTree::operator = (const TwoThreeTree& rightExp)
 {
-	Node* cur = nullptr;
+	ReadIterator rightTreeIterator(rightExp);
 	if (rightExp.root) {
-		while (rightExp.step(cur))
-			build(cur->getKey());
+		while (rightTreeIterator.ptr != NULLNODE) {
+			build(*rightTreeIterator);
+			rightTreeIterator++;
+		}
 		build(0);
 	}
 	return *this;
@@ -650,33 +651,6 @@ int menu()
 			cout << "Что-то пошло не так, выберите пункт меню повторно" << endl;
 	} while (cin.fail());
 	return point;
-}
-
-Stack::~Stack()
-{
-	El* s;
-	while (ptr) {
-		s = ptr;
-		ptr = ptr->prev;
-		delete s;
-	}
-}
-
-void Stack::push(Node* pp, int ct) //Вставить
-{
-	El* s = new El(pp, ct);
-	s->prev = ptr;
-	ptr = s;
-}
-
-int Stack::pop(Node*& pp, int& ct) //Вытолкнуть
-{
-	El* s = ptr;
-	pp = ptr->el;
-	ct = ptr->ctl;
-	ptr = ptr->prev;
-	delete s;
-	return (ptr != nullptr);
 }
 
 int main()
