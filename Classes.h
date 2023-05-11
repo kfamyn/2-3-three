@@ -4,7 +4,7 @@
 
 using namespace std;
 
-enum genSettings { genPower = 30, genMaxNum = 99 };
+enum genSettings { genPower = 10, genMaxNum = 99 };
 class Stack;
 struct ReadIterator;
 class TREE23;
@@ -27,6 +27,9 @@ public:
 	~Node() { delete down; }
 	//			if(next) delete next; };
 };
+
+Node sentinel;
+Node* NIL = &sentinel;
 
 using StackPairs = stack<std::pair<Node*, int>>;
 
@@ -55,7 +58,7 @@ struct ReadIterator : public std::iterator<std::forward_iterator_tag, int> {
 				stack.pop();
 				switch (a) {
 				case 1:
-					ptr = nullptr;	//Вернулись к корню, конец
+					ptr = NIL;	//Вернулись к корню, конец
 					return (*this);
 					break;
 				case 2:
@@ -79,7 +82,7 @@ struct ReadIterator : public std::iterator<std::forward_iterator_tag, int> {
 					return (*this);
 					break;
 				case 4:
-					ptr = nullptr;	//Обошли всё поддерево, подъём
+					//ptr = nullptr;	//Обошли всё поддерево, подъём
 					break;
 				}
 			}

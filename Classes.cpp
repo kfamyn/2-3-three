@@ -338,7 +338,7 @@ TREE23 :: ~TREE23()
 //***********************************************************************
 //Параметры вывода на экран
 const int FIRSTROW = 0, FIRSTCOL = 40,
-MAXCOL = 80, OFFSET[] = { 40, 24, 10, 4, 1 },
+MAXCOL = 120, OFFSET[] = { 40, 24, 10, 4, 1 },
 MAXROW = FIRSTROW + 18,
 MAXOUT = FIRSTROW + 14, SHIFT = 2;
 char SCREEN[MAXROW * MAXCOL];
@@ -561,22 +561,20 @@ bool TREE23::find(int num) const
 const TREE23& TREE23::operator &(const TREE23& rightExp) const
 {
 	TREE23* temp = new TREE23;
-	ReadIterator leftTree(*this);
-	ReadIterator rightTree(rightExp);
-	//Stack stackL, stackR;
-	int checkL, checkR;
+	ReadIterator leftTreeIterator(*this);
+	ReadIterator rightTreeIterator(rightExp);
 	bool t = false;
 	Node* curL = nullptr, * curR = nullptr;
-	while ((leftTree.ptr != nullptr) && (rightTree.ptr != nullptr)) {
-		while (((leftTree.ptr != nullptr) && (rightTree.ptr != nullptr)) && *leftTree < *rightTree)
-			leftTree++;
-		while (((rightTree.ptr != nullptr) && (rightTree.ptr != nullptr)) && *rightTree < *leftTree)
-			rightTree++;
-		if (*rightTree == *leftTree) {
-			temp->build(*rightTree);
+	while ((leftTreeIterator.ptr != nullptr) && (rightTreeIterator.ptr != nullptr)) {
+		while (((leftTreeIterator.ptr != nullptr) && (rightTreeIterator.ptr != nullptr)) && *leftTreeIterator < *rightTreeIterator)
+			leftTreeIterator++;
+		while (((leftTreeIterator.ptr != nullptr) && (rightTreeIterator.ptr != nullptr)) && *rightTreeIterator < *leftTreeIterator)
+			rightTreeIterator++;
+		if (((leftTreeIterator.ptr != nullptr) && (rightTreeIterator.ptr != nullptr)) && (*rightTreeIterator == *leftTreeIterator)) {
+			temp->build(*rightTreeIterator);
 			if (!t) t = true;
-			leftTree++;;
-			rightTree++;
+			leftTreeIterator++;;
+			rightTreeIterator++;
 		}
 	}
 	if (t)
@@ -587,40 +585,38 @@ const TREE23& TREE23::operator &(const TREE23& rightExp) const
 const TREE23& TREE23::operator | (const TREE23& rightExp) const
 {
 	TREE23* temp = new TREE23;
-	Stack stackL, stackR;
-	int checkL, checkR;
+	ReadIterator leftTreeIterator(*this);
+	ReadIterator rightTreeIterator(rightExp);
 	bool t = false;
 	Node* curL = nullptr, * curR = nullptr;
-	checkR = rightExp.step(curR, stackR);
-	checkL = step(curL, stackL);
-	while (checkL || checkR) {
+	while ((leftTreeIterator.ptr != NIL) || (rightTreeIterator.ptr != NIL)) {
 		if (!t) t = true;
-		if (checkL && checkR)
-			if (curR->getKey() == curL->getKey()) {
-				temp->build(curR->getKey());
-				checkL = step(curL, stackL);
-				checkR = rightExp.step(curR, stackR);
+		if (leftTreeIterator.ptr != NIL && rightTreeIterator.ptr != NIL)
+			if (*leftTreeIterator == *rightTreeIterator) {
+				temp->build(*leftTreeIterator);
+				leftTreeIterator++;
+				rightTreeIterator++;
 			}
 			else {
-				while (curL->getKey() < curR->getKey() && checkL) {
-					temp->build(curL->getKey());
-					checkL = step(curL, stackL);
+				while ((leftTreeIterator.ptr != NIL) && *leftTreeIterator < *rightTreeIterator) {
+					temp->build(*leftTreeIterator);
+					leftTreeIterator++;
 				}
-				while (curR->getKey() < curL->getKey() && checkR) {
-					temp->build(curR->getKey());
-					checkR = rightExp.step(curR, stackR);
+				while ((rightTreeIterator.ptr != NIL) && *rightTreeIterator < *leftTreeIterator) {
+					temp->build(*rightTreeIterator);
+					rightTreeIterator++;
 				}
 			}
 		else
-			if (checkL)
-				while (checkL) {
-					temp->build(curL->getKey());
-					checkL = step(curL, stackL);
+			if ((leftTreeIterator.ptr != NIL))
+				while ((leftTreeIterator.ptr != NIL)) {
+					temp->build(*leftTreeIterator);
+					leftTreeIterator++;
 				}
 			else
-				while (checkR) {
-					temp->build(curR->getKey());
-					checkR = step(curR, stackR);
+				while ((rightTreeIterator.ptr != NIL)) {
+					temp->build(*rightTreeIterator);
+					rightTreeIterator++;
 				}
 	}
 	if (t)
@@ -718,7 +714,7 @@ int main()
 			A.display();
 			B.display();*/
 			cout << "Результат E = (A^B-C) U D ∩ E))" << endl;
-			E = A & B;
+			E = A | B;
 			E.display();
 			cout << "Для возврата в меню введите любое число, для выхода 0: ";
 			cin >> pause;
