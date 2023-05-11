@@ -564,13 +564,12 @@ const TREE23& TREE23::operator &(const TREE23& rightExp) const
 	ReadIterator leftTreeIterator(*this);
 	ReadIterator rightTreeIterator(rightExp);
 	bool t = false;
-	Node* curL = nullptr, * curR = nullptr;
-	while ((leftTreeIterator.ptr != nullptr) && (rightTreeIterator.ptr != nullptr)) {
-		while (((leftTreeIterator.ptr != nullptr) && (rightTreeIterator.ptr != nullptr)) && *leftTreeIterator < *rightTreeIterator)
+	while ((leftTreeIterator.ptr != NIL) && (rightTreeIterator.ptr != NIL)) {
+		while (((leftTreeIterator.ptr != NIL) && (rightTreeIterator.ptr != NIL)) && *leftTreeIterator < *rightTreeIterator)
 			leftTreeIterator++;
-		while (((leftTreeIterator.ptr != nullptr) && (rightTreeIterator.ptr != nullptr)) && *rightTreeIterator < *leftTreeIterator)
+		while (((leftTreeIterator.ptr != NIL) && (rightTreeIterator.ptr != NIL)) && *rightTreeIterator < *leftTreeIterator)
 			rightTreeIterator++;
-		if (((leftTreeIterator.ptr != nullptr) && (rightTreeIterator.ptr != nullptr)) && (*rightTreeIterator == *leftTreeIterator)) {
+		if (((leftTreeIterator.ptr != NIL) && (rightTreeIterator.ptr != NIL)) && (*rightTreeIterator == *leftTreeIterator)) {
 			temp->build(*rightTreeIterator);
 			if (!t) t = true;
 			leftTreeIterator++;;
@@ -714,7 +713,7 @@ int main()
 			A.display();
 			B.display();*/
 			cout << "Результат E = (A^B-C) U D ∩ E))" << endl;
-			E = A | B;
+			E = A & B;
 			E.display();
 			/*ReadIterator readIterator(A);
 			while (readIterator.ptr != NIL) {
