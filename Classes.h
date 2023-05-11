@@ -4,7 +4,7 @@
 
 using namespace std;
 
-enum genSettings { genPower = 10, genMaxNum = 99 };
+enum genSettings { genPower = 20, genMaxNum = 99 };
 class Stack;
 struct ReadIterator;
 class TREE23;
@@ -78,8 +78,8 @@ struct ReadIterator : public std::iterator<std::forward_iterator_tag, int> {
 							stack.push(std::make_pair(ptr, 2));
 							ptr = ptr->getDown();
 						}
+						return (*this);
 					}
-					return (*this);
 					break;
 				case 4:
 					//ptr = nullptr;	//Обошли всё поддерево, подъём
@@ -140,7 +140,10 @@ public:
 };
 
 ReadIterator::ReadIterator(const TREE23& tree) {
-	if (!tree.root) return;//Дерево пусто, выход
+	if (!tree.root) {
+		ptr = NIL;
+		return;//Дерево пусто, выход
+	}
 	ptr = tree.root;	//Поиск крайнего левого элемента
 	stack.push(std::make_pair(ptr, 1));
 	while (ptr->getDown()) {
