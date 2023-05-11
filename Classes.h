@@ -1,13 +1,13 @@
 ﻿#ifndef CLASSES_H
 #define CLASSES_H
-#include <stack>
+
 
 using namespace std;
 
 enum genSettings { genPower = 20, genMaxNum = 99 };
 class Stack;
 struct ReadIterator;
-class TREE23;
+class TwoThreeTree;
 
 class Node {	//Узел дерева
 public:
@@ -16,7 +16,7 @@ public:
 	int key;		    //Ключ
 	Node* next, * down;
 	void erase();
-	friend class TREE23;
+	friend class TwoThreeTree;
 
 	Node() : down(nullptr), next(nullptr) {}
 	Node(int k) : key(k), down(nullptr), next(nullptr) {}
@@ -29,14 +29,14 @@ public:
 };
 
 Node sentinel;
-Node* NIL = &sentinel;
+Node* NULLNODE = &sentinel;
 
 using StackPairs = stack<std::pair<Node*, int>>;
 
 struct ReadIterator : public std::iterator<std::forward_iterator_tag, int> {
 	Node* ptr;
 	StackPairs stack;
-	ReadIterator(const TREE23& tree);
+	ReadIterator(const TwoThreeTree& tree);
 	ReadIterator(Node* p = nullptr) : ptr(p) { }
 	ReadIterator(Node* p, const StackPairs&& St) : ptr(p), stack(move(St)) {}
 	bool operator == (const ReadIterator& other) const { return ptr == other.ptr; }
@@ -58,7 +58,7 @@ struct ReadIterator : public std::iterator<std::forward_iterator_tag, int> {
 				stack.pop();
 				switch (a) {
 				case 1:
-					ptr = NIL;	//Вернулись к корню, конец
+					ptr = NULLNODE;	//Вернулись к корню, конец
 					return (*this);
 					break;
 				case 2:
@@ -95,16 +95,16 @@ struct ReadIterator : public std::iterator<std::forward_iterator_tag, int> {
 	reference operator*() const { return ptr->getKeyReference(); }
 };
 
-class TREE23 {	//Класс 2-3-дерева
+class TwoThreeTree {	//Класс 2-3-дерева
 	Node* root;
 	int height;
 	char name;
 	int count;
 	friend ReadIterator;
 public:
-	const TREE23& operator | (const TREE23&) const;
-	const TREE23& operator & (const TREE23&) const;
-	const TREE23& operator = (const TREE23&);
+	const TwoThreeTree& operator | (const TwoThreeTree&) const;
+	const TwoThreeTree& operator & (const TwoThreeTree&) const;
+	const TwoThreeTree& operator = (const TwoThreeTree&);
 
 	bool find(int num) const;
 	//int insert(int);   //Вставка элемента
@@ -112,10 +112,10 @@ public:
 	int build(int);    //Построение дерева
 	int step(Node*&, Stack&) const; //Шаг обхода
 	void genSet();     //Генерация данных
-	TREE23(char n = 'T') : root(nullptr), height(0), name(n) {};
+	TwoThreeTree(char n = 'T') : root(nullptr), height(0), name(n) {};
 	pair<ReadIterator, bool> insert(int k, ReadIterator where = ReadIterator());
 	int erase(int k);
-	~TREE23();
+	~TwoThreeTree();
 };
 
 
@@ -139,9 +139,9 @@ public:
 	int pop(Node*&, int&);
 };
 
-ReadIterator::ReadIterator(const TREE23& tree) {
+ReadIterator::ReadIterator(const TwoThreeTree& tree) {
 	if (!tree.root) {
-		ptr = NIL;
+		ptr = NULLNODE;
 		return;//Дерево пусто, выход
 	}
 	ptr = tree.root;	//Поиск крайнего левого элемента

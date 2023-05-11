@@ -2,313 +2,314 @@
 #include <locale>
 #include <stdio.h>
 #include <conio.h>
+#include <stack>
 #include "Classes.h"
 
 using std::cin;
 using std::cout;
 using std::endl;
 
-pair<ReadIterator, bool> TREE23::insert(int k, ReadIterator where)
+pair<ReadIterator, bool> TwoThreeTree::insert(int k, ReadIterator where)
 {
-	Node* t, * p, * q;
-	int a = 1, up = 0;
-	stack<pair<Node*, int>> St;
+	Node* temporaryRootPointer, * nodePointerP, * nodePointerQ;
+	int direction = 1, up = 0;
+	stack<pair<Node*, int>> stack;
 	//===== Инициализация =====
-	t = root;
-	if (t == nullptr) {	// Дерево пусто
+	temporaryRootPointer = root;
+	if (temporaryRootPointer == nullptr) {	// Дерево пусто
 		root = new Node(k);
 		height = 1;
-		return make_pair(ReadIterator(root, move(St)), true);
+		return make_pair(ReadIterator(root, move(stack)), true);
 	}
 	else {		//Поиск по дереву
-		St.push(make_pair(root, 1));	// Создание и инициализация стека
+		stack.push(make_pair(root, 1));	// Создание и инициализация стека
 										//===== Поиск места вставки =====
-		while (a) {
-			if ((k == t->key) || //Проверка на совпадение значений
-				(t->next) && (k == t->next->key) ||
-				(t->next) && (t->next->next) && (k == t->next->next->key)) { //Элемент имеется
-				return make_pair(ReadIterator(t, move(St)), false);		//Выход "вставка не понадобилась"
+		while (direction) {
+			if ((k == temporaryRootPointer->key) || //Проверка на совпадение значений
+				(temporaryRootPointer->next) && (k == temporaryRootPointer->next->key) ||
+				(temporaryRootPointer->next) && (temporaryRootPointer->next->next) && (k == temporaryRootPointer->next->next->key)) { //Элемент имеется
+				return make_pair(ReadIterator(temporaryRootPointer, move(stack)), false);		//Выход "вставка не понадобилась"
 			}
-			if (k < t->key) {
-				if (t->down) { //Идём вниз и влево
-					p = t->next->next;
-					t = t->down;
-					if (p) St.push(make_pair(t, 4));
-					else St.push(make_pair(t, 2));
+			if (k < temporaryRootPointer->key) {
+				if (temporaryRootPointer->down) { //Идём вниз и влево
+					nodePointerP = temporaryRootPointer->next->next;
+					temporaryRootPointer = temporaryRootPointer->down;
+					if (nodePointerP) stack.push(make_pair(temporaryRootPointer, 4));
+					else stack.push(make_pair(temporaryRootPointer, 2));
 				}
 				else { //Новый лист слева (вставка справа и перенос данных)
-					p = new Node(t->key);
-					p->next = t->next;
-					t->key = k;
-					if ((t->next) && (t->next->next)) up = 1; //Вставлен четвёртый
-					t->next = p;
-					a = 0;
+					nodePointerP = new Node(temporaryRootPointer->key);
+					nodePointerP->next = temporaryRootPointer->next;
+					temporaryRootPointer->key = k;
+					if ((temporaryRootPointer->next) && (temporaryRootPointer->next->next)) up = 1; //Вставлен четвёртый
+					temporaryRootPointer->next = nodePointerP;
+					direction = 0;
 				}
 			}
-			else if (!(t->next)) { //Добавление второго элемента
-				p = new Node(k);
-				t->next = p;
-				a = 0;
+			else if (!(temporaryRootPointer->next)) { //Добавление второго элемента
+				nodePointerP = new Node(k);
+				temporaryRootPointer->next = nodePointerP;
+				direction = 0;
 			}
-			else if (k < t->next->key) {
-				if (t->next->down) {//Идём вниз посередине
-					p = t->next->next;
-					t = t->next->down;
-					if (p) St.push(make_pair(t, 5));
-					else St.push(make_pair(t, 3));
+			else if (k < temporaryRootPointer->next->key) {
+				if (temporaryRootPointer->next->down) {//Идём вниз посередине
+					nodePointerP = temporaryRootPointer->next->next;
+					temporaryRootPointer = temporaryRootPointer->next->down;
+					if (nodePointerP) stack.push(make_pair(temporaryRootPointer, 5));
+					else stack.push(make_pair(temporaryRootPointer, 3));
 				}
 				else { // Новый лист посередине
-					p = new Node(k);
-					p->next = t->next;
-					if (t->next->next) up = 1; //Вставлен четвёртый
-					t->next = p;
-					a = 0;
+					nodePointerP = new Node(k);
+					nodePointerP->next = temporaryRootPointer->next;
+					if (temporaryRootPointer->next->next) up = 1; //Вставлен четвёртый
+					temporaryRootPointer->next = nodePointerP;
+					direction = 0;
 				}
 			}
-			else if (!t->next->next) { //Третьего пути нет;
-				if (t->next->down) {     //Идём вниз посередине
-					t->next->key = k; 	//Меняем наибольший
-					t = t->next->down;
-					St.push(make_pair(t, 3));
+			else if (!temporaryRootPointer->next->next) { //Третьего пути нет;
+				if (temporaryRootPointer->next->down) {     //Идём вниз посередине
+					temporaryRootPointer->next->key = k; 	//Меняем наибольший
+					temporaryRootPointer = temporaryRootPointer->next->down;
+					stack.push(make_pair(temporaryRootPointer, 3));
 				}
 				else {                   // Новый лист справа
-					p = new Node(k);
-					t->next->next = p;
-					a = 0;
+					nodePointerP = new Node(k);
+					temporaryRootPointer->next->next = nodePointerP;
+					direction = 0;
 				}
 			}
 			else {
-				if (t->next->next->down) { //Идём вниз и вправо
-					if (k > t->next->next->key)
-						t->next->next->key = k; //Меняем наибольший
-					t = t->next->next->down;
-					St.push(make_pair(t, 6));
+				if (temporaryRootPointer->next->next->down) { //Идём вниз и вправо
+					if (k > temporaryRootPointer->next->next->key)
+						temporaryRootPointer->next->next->key = k; //Меняем наибольший
+					temporaryRootPointer = temporaryRootPointer->next->next->down;
+					stack.push(make_pair(temporaryRootPointer, 6));
 				}
 				else {                     //Новый лист
-					p = new Node(k);
-					a = 0;
-					if (t->next->next) {    //Третий уже есть...
+					nodePointerP = new Node(k);
+					direction = 0;
+					if (temporaryRootPointer->next->next) {    //Третий уже есть...
 						up = 1;
-						if (k < t->next->next->key) { // - третий из четырёх
-							p->next = t->next->next;
-							t->next->next = p;
+						if (k < temporaryRootPointer->next->next->key) { // - третий из четырёх
+							nodePointerP->next = temporaryRootPointer->next->next;
+							temporaryRootPointer->next->next = nodePointerP;
 						}
 						else {                  // - четвёртый
-							t->next->next->next = p;
+							temporaryRootPointer->next->next->next = nodePointerP;
 						}
 					}
 					else { //Новый лист - третий из трёх
-						t->next->next = p;
-						//	           St->Top( )->key = k;
+						temporaryRootPointer->next->next = nodePointerP;
+						//	           stack->Top( )->key = k;
 					}
 				}
 			}
 		}
 		while (up) { //Устранение четвёртого сына (если он есть)
-			p = St.top().first;
-			a = St.top().second;
-			St.pop();	//p-> узел с четырьмя сыновьями
-			if (a != 1) t = St.top().first;	//t-> управляющий узел для "p->"
-			q = new Node(p->next->next->next->key);
-			switch (a) {
-			case 1:	//Корневой узел дерева: root == p == t
+			nodePointerP = stack.top().first;
+			direction = stack.top().second;
+			stack.pop();	//nodePointerP-> узел с четырьмя сыновьями
+			if (direction != 1) temporaryRootPointer = stack.top().first;	//temporaryRootPointer-> управляющий узел для "nodePointerP->"
+			nodePointerQ = new Node(nodePointerP->next->next->next->key);
+			switch (direction) {
+			case 1:	//Корневой узел дерева: root == nodePointerP == temporaryRootPointer
 				up = 0;
 				height++;	//Увеличение высоты дерева
-				root = t = new Node(root->next->key); //Создание двойного управляющего узла
-				t->down = p;
-				t->next = q;
+				root = temporaryRootPointer = new Node(root->next->key); //Создание двойного управляющего узла
+				temporaryRootPointer->down = nodePointerP;
+				temporaryRootPointer->next = nodePointerQ;
 				break;
 			case 2:	//Новый средний сын для двух
 				up = 0;
 			case 4:     //Новый средний для трёх
-				q->next = t->next; //вставка в цепочку
-				t->next = q;
-				t->key = p->next->key;	//Коррекция ссылочного значения
+				nodePointerQ->next = temporaryRootPointer->next; //вставка в цепочку
+				temporaryRootPointer->next = nodePointerQ;
+				temporaryRootPointer->key = nodePointerP->next->key;	//Коррекция ссылочного значения
 				break;
 			case 3:	//Новый правый сын для двух
 				up = 0;
 			case 5:     //Новый правый для трёх
-				q->next = t->next->next;
-				t->next->next = q;		//Присоединение к цепочке
-				t->next->key = p->next->key;	//Коррекция ссылочного значения
+				nodePointerQ->next = temporaryRootPointer->next->next;
+				temporaryRootPointer->next->next = nodePointerQ;		//Присоединение к цепочке
+				temporaryRootPointer->next->key = nodePointerP->next->key;	//Коррекция ссылочного значения
 				break;
 			case 6:	//Новый четвёртый сын
-				t->next->next->next = q;		//Присоединение к цепочке
-				t->next->next->key = p->next->key;	//Коррекция ссылочного значения
+				temporaryRootPointer->next->next->next = nodePointerQ;		//Присоединение к цепочке
+				temporaryRootPointer->next->next->key = nodePointerP->next->key;	//Коррекция ссылочного значения
 				break;
 			}
-			q->down = p->next->next;
-			p->next->next = nullptr; //Расцепление сыновей
+			nodePointerQ->down = nodePointerP->next->next;
+			nodePointerP->next->next = nullptr; //Расцепление сыновей
 		}
-		//delete St; 	//Уничтожение стека
-		return make_pair(ReadIterator(t, move(St)), true);
+		//delete stack; 	//Уничтожение стека
+		return make_pair(ReadIterator(temporaryRootPointer, move(stack)), true);
 	}
 }
 
-int TREE23::erase(int k)   //Удаление (единственного) элемента из 2-3-дерева
+int TwoThreeTree::erase(int k)   //Удаление (единственного) элемента из 2-3-дерева
 {
-	Node* t(root), * p(nullptr);
-	int a = 1, up = 0, result = 0;
-	if (t) {   //Дерево не пусто
-		if (t->next) {
-			if (t->next->next) {
-				if (k > t->next->next->key) return result;
+	Node* temporaryRootPointer(root), * nodePointerP(nullptr);
+	int direction = 1, up = 0, result = 0;
+	if (temporaryRootPointer) {   //Дерево не пусто
+		if (temporaryRootPointer->next) {
+			if (temporaryRootPointer->next->next) {
+				if (k > temporaryRootPointer->next->next->key) return result;
 			}
 			else
-				if (k > t->next->key) return result;
+				if (k > temporaryRootPointer->next->key) return result;
 		}
 		else
-			if (k > t->key) return result;
+			if (k > temporaryRootPointer->key) return result;
 		// //k больше максимума, выход
-		stack<pair<Node*, int>> St;
-		St.push(make_pair(t, 1));   // Создание и инициализация стека
+		stack<pair<Node*, int>> stack;
+		stack.push(make_pair(temporaryRootPointer, 1));   // Создание и инициализация стека
 		while (1) {
-			if (t->down) { //Узел — не лист, идём вниз
-				if (k < t->key) { //Идём влево
-					St.push(make_pair(t, 1));
-					t = t->down;
+			if (temporaryRootPointer->down) { //Узел — не лист, идём вниз
+				if (k < temporaryRootPointer->key) { //Идём влево
+					stack.push(make_pair(temporaryRootPointer, 1));
+					temporaryRootPointer = temporaryRootPointer->down;
 				}
-				else if (!(t->next->next) ||
-					k < t->next->next->key) { //Идём посередине
-					St.push(make_pair(t, 2));
-					t = t->next->down;
+				else if (!(temporaryRootPointer->next->next) ||
+					k < temporaryRootPointer->next->next->key) { //Идём посередине
+					stack.push(make_pair(temporaryRootPointer, 2));
+					temporaryRootPointer = temporaryRootPointer->next->down;
 				}
 				else { //Идём вправо
-					St.push(make_pair(t, 3));
-					t = t->next->next->down;
+					stack.push(make_pair(temporaryRootPointer, 3));
+					temporaryRootPointer = temporaryRootPointer->next->next->down;
 				}
 			}
 			else {         //Дошли до листа,
-				if (k == t->key) {   // проверка на совпадение значений
-					if (p = t->next) {   //Лист хотя бы двойной
-						t->key = t->next->key; //Подмена первого вторым
-						t->next = t->next->next;
-						if (t != root) {
+				if (k == temporaryRootPointer->key) {   // проверка на совпадение значений
+					if (nodePointerP = temporaryRootPointer->next) {   //Лист хотя бы двойной
+						temporaryRootPointer->key = temporaryRootPointer->next->key; //Подмена первого вторым
+						temporaryRootPointer->next = temporaryRootPointer->next->next;
+						if (temporaryRootPointer != root) {
 							result = 2; //Корректировать минимум выше по дереву
-							if (!t->next) up = 1; //Остался единственный
+							if (!temporaryRootPointer->next) up = 1; //Остался единственный
 						}
 						else result = 1; //Удаляется начало в корне
 						--count;
-						delete p;   //Удаление второго
+						delete nodePointerP;   //Удаление второго
 					}
 					else {   //Удаление единственного листа в корне
-						delete t;
+						delete temporaryRootPointer;
 						height = count = 0;
 						root = nullptr;
 						result = 1;
 					}
 				}
-				else if ((p = t->next) && (k == t->next->key)) {
-					t->next = t->next->next; //Исключение второго
+				else if ((nodePointerP = temporaryRootPointer->next) && (k == temporaryRootPointer->next->key)) {
+					temporaryRootPointer->next = temporaryRootPointer->next->next; //Исключение второго
 					result = 1;
-					if (!t->next && t != root) up = 1;    //Остался единственный
+					if (!temporaryRootPointer->next && temporaryRootPointer != root) up = 1;    //Остался единственный
 					--count;
-					delete p;   //Удаление второго
+					delete nodePointerP;   //Удаление второго
 				}
-				else if ((p = t->next->next) && (k == t->next->next->key)) {
-					t->next->next = nullptr;
+				else if ((nodePointerP = temporaryRootPointer->next->next) && (k == temporaryRootPointer->next->next->key)) {
+					temporaryRootPointer->next->next = nullptr;
 					result = 1;
 					--count;
-					delete p;   //Удаление третьего
+					delete nodePointerP;   //Удаление третьего
 				}
 				break;    //Конец поиска, элемент удалён или не найден
 			}
 		}
 		while (up) { //Устранение единственного сына (если он получился)
 			up = 0;
-			p = St.top().first; a = St.top().second; //сын p — одиночный узел t
-			switch (a) {
-			case 1:   //Неполный узел слева: t == p->down
-				if (p->key != t->key) p->key = t->key, result = 2;
+			nodePointerP = stack.top().first; direction = stack.top().second; //сын nodePointerP — одиночный узел temporaryRootPointer
+			switch (direction) {
+			case 1:   //Неполный узел слева: temporaryRootPointer == nodePointerP->down
+				if (nodePointerP->key != temporaryRootPointer->key) nodePointerP->key = temporaryRootPointer->key, result = 2;
 				else result = 1;
-				if (p->next->down->next->next) {   //Справа — тройной узел,
-					t->next = p->next->down;             // берём сына
-					p->next->down = t->next->next;
-					t->next->next = nullptr;
-					p->next->key = p->next->down->key;
+				if (nodePointerP->next->down->next->next) {   //Справа — тройной узел,
+					temporaryRootPointer->next = nodePointerP->next->down;             // берём сына
+					nodePointerP->next->down = temporaryRootPointer->next->next;
+					temporaryRootPointer->next->next = nullptr;
+					nodePointerP->next->key = nodePointerP->next->down->key;
 				}
 				else {   //Справа — двойной, присоединяем его сыновей
-					t->next = p->next->down;
-					if (p->next->next) { //УУ — группа из трёх
-						t = p->next;
-						p->next = p->next->next;
-						delete t; result = 1;
+					temporaryRootPointer->next = nodePointerP->next->down;
+					if (nodePointerP->next->next) { //УУ — группа из трёх
+						temporaryRootPointer = nodePointerP->next;
+						nodePointerP->next = nodePointerP->next->next;
+						delete temporaryRootPointer; result = 1;
 					}
-					else if (p == root) { //Двойной — в корне: удаляем оба
-						root = t;
+					else if (nodePointerP == root) { //Двойной — в корне: удаляем оба
+						root = temporaryRootPointer;
 						--height;
-						delete p->next;
-						delete p;
+						delete nodePointerP->next;
+						delete nodePointerP;
 						result = 1;
 					}
 					else { //Двойной УУ —  не в корне, удаляем второй и вверх
-						delete p->next;
-						p->next = nullptr;
-						t = p;
+						delete nodePointerP->next;
+						nodePointerP->next = nullptr;
+						temporaryRootPointer = nodePointerP;
 						up = 1;
-						St.pop();
+						stack.pop();
 					}
 				}
 				break;
-			case 2:   //Неполный узел посередине: p == t->next->down
-				if (p->down->next->next) {   //Слева — тройной узел,
-					p->down->next->next->next = t; // берём сына
-					p->next->down = p->down->next->next;
-					p->down->next->next = nullptr;
-					p->next->key = p->next->down->key;
+			case 2:   //Неполный узел посередине: nodePointerP == temporaryRootPointer->next->down
+				if (nodePointerP->down->next->next) {   //Слева — тройной узел,
+					nodePointerP->down->next->next->next = temporaryRootPointer; // берём сына
+					nodePointerP->next->down = nodePointerP->down->next->next;
+					nodePointerP->down->next->next = nullptr;
+					nodePointerP->next->key = nodePointerP->next->down->key;
 				}
 				else {   //Слева - двойной, отдаём ему сына, удаляем УУ
-					p->down->next->next = t;
-					t = p->next;
-					p->next = p->next->next;
-					delete t;
-					if (!p->next) { //УУ был двойной
-						if (p == root) { //УУ - корневой: удаляем и второй
-							root = p->down;
+					nodePointerP->down->next->next = temporaryRootPointer;
+					temporaryRootPointer = nodePointerP->next;
+					nodePointerP->next = nodePointerP->next->next;
+					delete temporaryRootPointer;
+					if (!nodePointerP->next) { //УУ был двойной
+						if (nodePointerP == root) { //УУ - корневой: удаляем и второй
+							root = nodePointerP->down;
 							--height;
-							delete p;
+							delete nodePointerP;
 							result = 1;
 						}
 						else { // одиночный УУ - не корень: вверх
 							up = 1;
-							t = p;
-							St.pop();
+							temporaryRootPointer = nodePointerP;
+							stack.pop();
 						}
 					}
 				}
 				break;
-			case 3:   //Неполный узел справа: p == t->next->next->down
-				if (p->next->down->next->next) {   //Слева - тройной узел,
-					p->next->down->next->next->next = t; // берём сына
-					p->next->next->down = p->next->down->next->next;
-					p->next->down->next->next = nullptr;
-					p->next->next->key = p->next->next->down->key;
+			case 3:   //Неполный узел справа: nodePointerP == temporaryRootPointer->next->next->down
+				if (nodePointerP->next->down->next->next) {   //Слева - тройной узел,
+					nodePointerP->next->down->next->next->next = temporaryRootPointer; // берём сына
+					nodePointerP->next->next->down = nodePointerP->next->down->next->next;
+					nodePointerP->next->down->next->next = nullptr;
+					nodePointerP->next->next->key = nodePointerP->next->next->down->key;
 				}
 				else {   //Слева — двойной, отдаём ему сына, удаляем
-					p->next->down->next->next = t;
-					delete p->next->next;
-					p->next->next = nullptr;
+					nodePointerP->next->down->next->next = temporaryRootPointer;
+					delete nodePointerP->next->next;
+					nodePointerP->next->next = nullptr;
 					result = 1;
 				}
 			}
 		}
 		if (result == 2) {   //Корректировка минимума
 			do {
-				p = St.top().first;
-				switch (St.top().second) {
+				nodePointerP = stack.top().first;
+				switch (stack.top().second) {
 				case 1:
-					p->key = p->down->key;
+					nodePointerP->key = nodePointerP->down->key;
 					break;
 				case 2:
-					p->next->key = p->next->down->key;
+					nodePointerP->next->key = nodePointerP->next->down->key;
 					result = 1;
 					break;
 				case 3:
-					p->next->next->key = p->next->next->down->key;
+					nodePointerP->next->next->key = nodePointerP->next->next->down->key;
 					result = 1;
 				}
-				if (St.top().first == root) break;
-				St.pop();
+				if (stack.top().first == root) break;
+				stack.pop();
 			} while (result == 2);
 		}
 	}
@@ -331,7 +332,7 @@ void Node::erase() //удаление узла
 	}
 }
 //-----------------------------------------------------------------------
-TREE23 :: ~TREE23()
+TwoThreeTree :: ~TwoThreeTree()
 {
 	if (root) root->erase();
 }
@@ -381,7 +382,7 @@ void Node::out(int row, int col)
 }
 //-----------------------------------------------------------------------
 //Вывод дерева на экран
-void TREE23::display()
+void TwoThreeTree::display()
 {
 	clrscr();
 	gotoxy(FIRSTCOL - OFFSET[0], FIRSTROW);
@@ -407,21 +408,21 @@ void Node::display(int lvl, int col)
 //Вставка в 2-3 дерево
 //***********************************************************************
 //Создание 2-3 дерева по возрастающей последовательности
-int TREE23::build(int k)	// Приём возрастающей последовательности
+int TwoThreeTree::build(int k)	// Приём возрастающей последовательности
 {
-	Node* q;				// и преобразование её в 2-3-дерево
-	static Node* p;
+	Node* nodePointerQ;				// и преобразование её в 2-3-дерево
+	static Node* nodePointerP;
 	static int count = 0;
 
 	if (k) { //Добавление в очередь
-		q = new Node(k);
+		nodePointerQ = new Node(k);
 		if (root == nullptr) { //Первое обращение
-			root = p = q;
+			root = nodePointerP = nodePointerQ;
 			count = 1;
 		}
 		else {
-			p->next = q;
-			p = q;
+			nodePointerP->next = nodePointerQ;
+			nodePointerP = nodePointerQ;
 			count++;
 		}
 	}
@@ -429,52 +430,52 @@ int TREE23::build(int k)	// Приём возрастающей последов
 		int rest = count;
 		height = 1;
 		while (rest > 3) {
-			q = root;
+			nodePointerQ = root;
 			height++;
 			if (rest == 4) { //Два управляющих узла
-				root = new Node(q->next->key);
-				p = new Node(q->next->next->next->key);
-				root->next = p;
-				root->down = q;
-				p->down = q->next->next;
-				q->next->next = nullptr;
+				root = new Node(nodePointerQ->next->key);
+				nodePointerP = new Node(nodePointerQ->next->next->next->key);
+				root->next = nodePointerP;
+				root->down = nodePointerQ;
+				nodePointerP->down = nodePointerQ->next->next;
+				nodePointerQ->next->next = nullptr;
 				rest = 0;
 			}
 			else { //Цепочка управляющих узлов
 				int last = rest - 3;
-				root = p = new Node(q->next->next->key);
-				p->down = q;
-				q = q->next->next->next;
-				p->down->next->next->next = nullptr;
+				root = nodePointerP = new Node(nodePointerQ->next->next->key);
+				nodePointerP->down = nodePointerQ;
+				nodePointerQ = nodePointerQ->next->next->next;
+				nodePointerP->down->next->next->next = nullptr;
 				rest = 1;
 				while (last) {
 					rest++;
 					switch (last) {
 					case 2:
-						p->next = new Node(q->next->key);
-						p->next->down = q;
+						nodePointerP->next = new Node(nodePointerQ->next->key);
+						nodePointerP->next->down = nodePointerQ;
 						last = 0;
 						break;
 					case 3:
-						p->next = new Node(q->next->next->key);
-						p->next->down = q;
+						nodePointerP->next = new Node(nodePointerQ->next->next->key);
+						nodePointerP->next->down = nodePointerQ;
 						last = 0;
 						break;
 					case 4:
-						p->next = new Node(q->next->key);
-						p->next->down = q;
-						p->next->next = new Node(q->next->next->next->key);
-						p->next->next->down = q->next->next;
-						q->next->next = nullptr;
+						nodePointerP->next = new Node(nodePointerQ->next->key);
+						nodePointerP->next->down = nodePointerQ;
+						nodePointerP->next->next = new Node(nodePointerQ->next->next->next->key);
+						nodePointerP->next->next->down = nodePointerQ->next->next;
+						nodePointerQ->next->next = nullptr;
 						last = 0;
 						rest++;
 						break;
 					default:
-						p->next = new Node(q->next->next->key);
-						p->next->down = q;
-						q = q->next->next->next;
-						p = p->next;
-						p->down->next->next->next = nullptr;
+						nodePointerP->next = new Node(nodePointerQ->next->next->key);
+						nodePointerP->next->down = nodePointerQ;
+						nodePointerQ = nodePointerQ->next->next->next;
+						nodePointerP = nodePointerP->next;
+						nodePointerP->down->next->next->next = nullptr;
 						last -= 3;
 						break;
 					}
@@ -487,44 +488,44 @@ int TREE23::build(int k)	// Приём возрастающей последов
 //***********************************************************************
 //Обход 2-3 дерева
 Stack globalStack;	//Внешний стек для функции step
-int TREE23::step(Node*& p, Stack& stack = globalStack) const
+int TwoThreeTree::step(Node*& nodePointerP, Stack& stack = globalStack) const
 {
-	int a;
-	if (!p) { //Первое обращение
+	int direction;
+	if (!nodePointerP) { //Первое обращение
 		if (!root) return 0; //Дерево пусто, выход
-		p = root;	//Поиск крайнего левого элемента
-		stack.push(p, 1);
-		while (p->down) {
-			stack.push(p, 2);
-			p = p->down;
+		nodePointerP = root;	//Поиск крайнего левого элемента
+		stack.push(nodePointerP, 1);
+		while (nodePointerP->down) {
+			stack.push(nodePointerP, 2);
+			nodePointerP = nodePointerP->down;
 		}
 		return 1;
 	}
 	else { //Текущий уже выдан
-		if (p->next) { //Есть лист справа, шаг вправо
-			p = p->next;
+		if (nodePointerP->next) { //Есть лист справа, шаг вправо
+			nodePointerP = nodePointerP->next;
 			return 1;
 		}
 		while (true) {	//Поиск очередного листа
-			stack.pop(p, a);	//Шаг вверх
-			switch (a) {
+			stack.pop(nodePointerP, direction);	//Шаг вверх
+			switch (direction) {
 			case 1:
 				return 0;	//Вернулись к корню, конец
 			case 2:
-				stack.push(p, 3);	//Спуск по средней ветке
-				p = p->next->down;
-				while (p->down) {
-					stack.push(p, 2);
-					p = p->down;
+				stack.push(nodePointerP, 3);	//Спуск по средней ветке
+				nodePointerP = nodePointerP->next->down;
+				while (nodePointerP->down) {
+					stack.push(nodePointerP, 2);
+					nodePointerP = nodePointerP->down;
 				}
 				return 1;
 			case 3:
-				if (p->next->next) {
-					stack.push(p, 4);	//Спуск по правой (если есть)
-					p = p->next->next->down;
-					while (p->down) {
-						stack.push(p, 2);
-						p = p->down;
+				if (nodePointerP->next->next) {
+					stack.push(nodePointerP, 4);	//Спуск по правой (если есть)
+					nodePointerP = nodePointerP->next->next->down;
+					while (nodePointerP->down) {
+						stack.push(nodePointerP, 2);
+						nodePointerP = nodePointerP->down;
 					}
 					return 1;
 				}
@@ -535,7 +536,7 @@ int TREE23::step(Node*& p, Stack& stack = globalStack) const
 }
 //***********************************************************************
 //Генерация 2-3 дерева
-void TREE23::genSet()
+void TwoThreeTree::genSet()
 {
 	int power = (rand() % genPower);
 	while (power--)
@@ -543,87 +544,87 @@ void TREE23::genSet()
 }
 //***********************************************************************
 //Поиск по ключу в 2-3 дереве
-bool TREE23::find(int num) const
+bool TwoThreeTree::find(int num) const
 {
-	Node* t = root;
-	while (t) {
-		if (num == t->getKey())
+	Node* temporaryRootPointer = root;
+	while (temporaryRootPointer) {
+		if (num == temporaryRootPointer->getKey())
 			return true;
-		if (num > t->getKey() && t->next)
-			t = t->next;
+		if (num > temporaryRootPointer->getKey() && temporaryRootPointer->next)
+			temporaryRootPointer = temporaryRootPointer->next;
 		else
-			t = t->down;
+			temporaryRootPointer = temporaryRootPointer->down;
 	}
 	return false;
 }
 //***********************************************************************
 //Перегрузка операторов 2-3 дерева
-const TREE23& TREE23::operator &(const TREE23& rightExp) const
+const TwoThreeTree& TwoThreeTree::operator &(const TwoThreeTree& rightExp) const
 {
-	TREE23* temp = new TREE23;
+	TwoThreeTree* temp = new TwoThreeTree;
 	ReadIterator leftTreeIterator(*this);
 	ReadIterator rightTreeIterator(rightExp);
-	bool t = false;
-	while ((leftTreeIterator.ptr != NIL) && (rightTreeIterator.ptr != NIL)) {
-		while (((leftTreeIterator.ptr != NIL) && (rightTreeIterator.ptr != NIL)) && *leftTreeIterator < *rightTreeIterator)
+	bool temporaryRootPointer = false;
+	while ((leftTreeIterator.ptr != NULLNODE) && (rightTreeIterator.ptr != NULLNODE)) {
+		while (((leftTreeIterator.ptr != NULLNODE) && (rightTreeIterator.ptr != NULLNODE)) && *leftTreeIterator < *rightTreeIterator)
 			leftTreeIterator++;
-		while (((leftTreeIterator.ptr != NIL) && (rightTreeIterator.ptr != NIL)) && *rightTreeIterator < *leftTreeIterator)
+		while (((leftTreeIterator.ptr != NULLNODE) && (rightTreeIterator.ptr != NULLNODE)) && *rightTreeIterator < *leftTreeIterator)
 			rightTreeIterator++;
-		if (((leftTreeIterator.ptr != NIL) && (rightTreeIterator.ptr != NIL)) && (*rightTreeIterator == *leftTreeIterator)) {
+		if (((leftTreeIterator.ptr != NULLNODE) && (rightTreeIterator.ptr != NULLNODE)) && (*rightTreeIterator == *leftTreeIterator)) {
 			temp->build(*rightTreeIterator);
-			if (!t) t = true;
+			if (!temporaryRootPointer) temporaryRootPointer = true;
 			leftTreeIterator++;;
 			rightTreeIterator++;
 		}
 	}
-	if (t)
+	if (temporaryRootPointer)
 		temp->build(0);
 	return *temp;
 }
 
-const TREE23& TREE23::operator | (const TREE23& rightExp) const
+const TwoThreeTree& TwoThreeTree::operator | (const TwoThreeTree& rightExp) const
 {
-	TREE23* temp = new TREE23;
+	TwoThreeTree* temp = new TwoThreeTree;
 	ReadIterator leftTreeIterator(*this);
 	ReadIterator rightTreeIterator(rightExp);
-	bool t = false;
+	bool temporaryRootPointer = false;
 	Node* curL = nullptr, * curR = nullptr;
-	while ((leftTreeIterator.ptr != NIL) || (rightTreeIterator.ptr != NIL)) {
-		if (!t) t = true;
-		if (leftTreeIterator.ptr != NIL && rightTreeIterator.ptr != NIL)
+	while ((leftTreeIterator.ptr != NULLNODE) || (rightTreeIterator.ptr != NULLNODE)) {
+		if (!temporaryRootPointer) temporaryRootPointer = true;
+		if (leftTreeIterator.ptr != NULLNODE && rightTreeIterator.ptr != NULLNODE)
 			if (*leftTreeIterator == *rightTreeIterator) {
 				temp->build(*leftTreeIterator);
 				leftTreeIterator++;
 				rightTreeIterator++;
 			}
 			else {
-				while ((leftTreeIterator.ptr != NIL) && *leftTreeIterator < *rightTreeIterator) {
+				while ((leftTreeIterator.ptr != NULLNODE) && *leftTreeIterator < *rightTreeIterator) {
 					temp->build(*leftTreeIterator);
 					leftTreeIterator++;
 				}
-				while ((rightTreeIterator.ptr != NIL) && *rightTreeIterator < *leftTreeIterator) {
+				while ((rightTreeIterator.ptr != NULLNODE) && *rightTreeIterator < *leftTreeIterator) {
 					temp->build(*rightTreeIterator);
 					rightTreeIterator++;
 				}
 			}
 		else
-			if ((leftTreeIterator.ptr != NIL))
-				while ((leftTreeIterator.ptr != NIL)) {
+			if ((leftTreeIterator.ptr != NULLNODE))
+				while ((leftTreeIterator.ptr != NULLNODE)) {
 					temp->build(*leftTreeIterator);
 					leftTreeIterator++;
 				}
 			else
-				while ((rightTreeIterator.ptr != NIL)) {
+				while ((rightTreeIterator.ptr != NULLNODE)) {
 					temp->build(*rightTreeIterator);
 					rightTreeIterator++;
 				}
 	}
-	if (t)
+	if (temporaryRootPointer)
 		temp->build(0);
 	return *temp;
 }
 
-const TREE23& TREE23::operator = (const TREE23& rightExp)
+const TwoThreeTree& TwoThreeTree::operator = (const TwoThreeTree& rightExp)
 {
 	Node* cur = nullptr;
 	if (rightExp.root) {
@@ -685,7 +686,7 @@ int main()
 	int pause;
 	do
 	{
-		TREE23 A('A'), B('B'), C('C'), D('D'), E('E');
+		TwoThreeTree A('A'), B('B'), C('C'), D('D'), E('E');
 		switch (pause = menu())
 		{
 		case 1:
@@ -716,7 +717,7 @@ int main()
 			E = A & B;
 			E.display();
 			/*ReadIterator readIterator(A);
-			while (readIterator.ptr != NIL) {
+			while (readIterator.ptr != NULLNODE) {
 				std::cout << *readIterator << " ";
 				readIterator++;
 			}*/
