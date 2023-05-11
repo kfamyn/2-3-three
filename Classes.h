@@ -5,14 +5,14 @@ struct ReadIterator;
 class TwoThreeTree;
 
 class Node {	//Узел дерева
-public:
+private:
 	void display(int, int);
 	void out(int, int);
 	int key;		    //Ключ
 	Node* next, * down;
 	void erase();
 	friend class TwoThreeTree;
-
+public:
 	Node() : down(nullptr), next(nullptr) {}
 	Node(int k) : key(k), down(nullptr), next(nullptr) {}
 	int getKey() const { return key; }
