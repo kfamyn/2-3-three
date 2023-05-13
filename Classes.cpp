@@ -6,8 +6,8 @@
 #include "Classes.h"
 
 //Имитация пустого узла для итератора чтения (защита от обращения к пустому узлу)
-Node sentinel;
-Node* NULLNODE = &sentinel;
+Node NULL_NODE_IMITATION;
+Node* NULLNODE = &NULL_NODE_IMITATION;
 //***********************************************************************
 //Параметры вывода на экран
 const int FIRSTROW = 0, FIRSTCOL = 40,
@@ -571,18 +571,31 @@ bool TwoThreeTree::find(int num) const
 }
 //***********************************************************************
 //Перегрузка операторов 2-3 дерева
-const TwoThreeTree& TwoThreeTree::operator &(const TwoThreeTree& rightExp) const
+const TwoThreeTree& TwoThreeTree::operator = (const TwoThreeTree& rightTreeOperand)
+{
+	ReadIterator rightTreeIterator(rightTreeOperand);
+	if (rightTreeOperand.root) {
+		while (rightTreeIterator.ptr != NULLNODE) {
+			build(*rightTreeIterator);
+			rightTreeIterator++;
+		}
+		build(0);
+	}
+	return *this;
+}
+
+const TwoThreeTree& TwoThreeTree::operator &(const TwoThreeTree& rightTreeOperand) const
 {
 	TwoThreeTree* temp = new TwoThreeTree;
 	ReadIterator leftTreeIterator(*this);
-	ReadIterator rightTreeIterator(rightExp);
+	ReadIterator rightTreeIterator(rightTreeOperand);
 	bool temporaryRootPointer = false;
-	while ((leftTreeIterator.ptr != NULLNODE) && (rightTreeIterator.ptr != NULLNODE)) {
-		while (((leftTreeIterator.ptr != NULLNODE) && (rightTreeIterator.ptr != NULLNODE)) && *leftTreeIterator < *rightTreeIterator)
+	while (leftTreeIterator.ptr != NULLNODE && rightTreeIterator.ptr != NULLNODE) {
+		while (leftTreeIterator.ptr != NULLNODE && rightTreeIterator.ptr != NULLNODE && *leftTreeIterator < *rightTreeIterator)
 			leftTreeIterator++;
-		while (((leftTreeIterator.ptr != NULLNODE) && (rightTreeIterator.ptr != NULLNODE)) && *rightTreeIterator < *leftTreeIterator)
+		while (leftTreeIterator.ptr != NULLNODE && rightTreeIterator.ptr != NULLNODE && *rightTreeIterator < *leftTreeIterator)
 			rightTreeIterator++;
-		if (((leftTreeIterator.ptr != NULLNODE) && (rightTreeIterator.ptr != NULLNODE)) && (*rightTreeIterator == *leftTreeIterator)) {
+		if (leftTreeIterator.ptr != NULLNODE && rightTreeIterator.ptr != NULLNODE && *rightTreeIterator == *leftTreeIterator) {
 			temp->build(*rightTreeIterator);
 			if (!temporaryRootPointer) temporaryRootPointer = true;
 			leftTreeIterator++;;
@@ -594,13 +607,13 @@ const TwoThreeTree& TwoThreeTree::operator &(const TwoThreeTree& rightExp) const
 	return *temp;
 }
 
-const TwoThreeTree& TwoThreeTree::operator | (const TwoThreeTree& rightExp) const
+const TwoThreeTree& TwoThreeTree::operator | (const TwoThreeTree& rightTreeOperand) const
 {
 	TwoThreeTree* temp = new TwoThreeTree;
 	ReadIterator leftTreeIterator(*this);
-	ReadIterator rightTreeIterator(rightExp);
+	ReadIterator rightTreeIterator(rightTreeOperand);
 	bool temporaryRootPointer = false;
-	while ((leftTreeIterator.ptr != NULLNODE) || (rightTreeIterator.ptr != NULLNODE)) {
+	while (leftTreeIterator.ptr != NULLNODE || rightTreeIterator.ptr != NULLNODE) {
 		if (!temporaryRootPointer) temporaryRootPointer = true;
 		if (leftTreeIterator.ptr != NULLNODE && rightTreeIterator.ptr != NULLNODE)
 			if (*leftTreeIterator == *rightTreeIterator) {
@@ -609,23 +622,23 @@ const TwoThreeTree& TwoThreeTree::operator | (const TwoThreeTree& rightExp) cons
 				rightTreeIterator++;
 			}
 			else {
-				while ((leftTreeIterator.ptr != NULLNODE) && *leftTreeIterator < *rightTreeIterator) {
+				while (leftTreeIterator.ptr != NULLNODE && *leftTreeIterator < *rightTreeIterator) {
 					temp->build(*leftTreeIterator);
 					leftTreeIterator++;
 				}
-				while ((rightTreeIterator.ptr != NULLNODE) && *rightTreeIterator < *leftTreeIterator) {
+				while (rightTreeIterator.ptr != NULLNODE && *rightTreeIterator < *leftTreeIterator) {
 					temp->build(*rightTreeIterator);
 					rightTreeIterator++;
 				}
 			}
 		else
-			if ((leftTreeIterator.ptr != NULLNODE))
-				while ((leftTreeIterator.ptr != NULLNODE)) {
+			if (leftTreeIterator.ptr != NULLNODE)
+				while (leftTreeIterator.ptr != NULLNODE) {
 					temp->build(*leftTreeIterator);
 					leftTreeIterator++;
 				}
 			else
-				while ((rightTreeIterator.ptr != NULLNODE)) {
+				while (rightTreeIterator.ptr != NULLNODE) {
 					temp->build(*rightTreeIterator);
 					rightTreeIterator++;
 				}
@@ -635,13 +648,13 @@ const TwoThreeTree& TwoThreeTree::operator | (const TwoThreeTree& rightExp) cons
 	return *temp;
 }
 
-const TwoThreeTree& TwoThreeTree::operator ^ (const TwoThreeTree& rightExp) const
+const TwoThreeTree& TwoThreeTree::operator ^ (const TwoThreeTree& rightTreeOperand) const
 {
 	TwoThreeTree* temp = new TwoThreeTree;
 	ReadIterator leftTreeIterator(*this);
-	ReadIterator rightTreeIterator(rightExp);
+	ReadIterator rightTreeIterator(rightTreeOperand);
 	bool temporaryRootPointer = false;
-	while ((leftTreeIterator.ptr != NULLNODE) || (rightTreeIterator.ptr != NULLNODE)) {
+	while (leftTreeIterator.ptr != NULLNODE || rightTreeIterator.ptr != NULLNODE) {
 		if (!temporaryRootPointer) temporaryRootPointer = true;
 		if (leftTreeIterator.ptr != NULLNODE && rightTreeIterator.ptr != NULLNODE)
 			if (*leftTreeIterator == *rightTreeIterator) {
@@ -649,23 +662,23 @@ const TwoThreeTree& TwoThreeTree::operator ^ (const TwoThreeTree& rightExp) cons
 				rightTreeIterator++;
 			}
 			else {
-				while ((leftTreeIterator.ptr != NULLNODE) && *leftTreeIterator < *rightTreeIterator) {
+				while (leftTreeIterator.ptr != NULLNODE && *leftTreeIterator < *rightTreeIterator) {
 					temp->build(*leftTreeIterator);
 					leftTreeIterator++;
 				}
-				while ((rightTreeIterator.ptr != NULLNODE) && *rightTreeIterator < *leftTreeIterator) {
+				while (rightTreeIterator.ptr != NULLNODE && *rightTreeIterator < *leftTreeIterator) {
 					temp->build(*rightTreeIterator);
 					rightTreeIterator++;
 				}
 			}
 		else
-			if ((leftTreeIterator.ptr != NULLNODE))
-				while ((leftTreeIterator.ptr != NULLNODE)) {
+			if (leftTreeIterator.ptr != NULLNODE)
+				while (leftTreeIterator.ptr != NULLNODE) {
 					temp->build(*leftTreeIterator);
 					leftTreeIterator++;
 				}
 			else
-				while ((rightTreeIterator.ptr != NULLNODE)) {
+				while (rightTreeIterator.ptr != NULLNODE) {
 					temp->build(*rightTreeIterator);
 					rightTreeIterator++;
 				}
@@ -675,22 +688,22 @@ const TwoThreeTree& TwoThreeTree::operator ^ (const TwoThreeTree& rightExp) cons
 	return *temp;
 }
 
-const TwoThreeTree& TwoThreeTree::operator /(const TwoThreeTree& rightExp) const
+const TwoThreeTree& TwoThreeTree::operator /(const TwoThreeTree& rightTreeOperand) const
 {
 	int iteration;
 	TwoThreeTree* temp = new TwoThreeTree;
 	ReadIterator leftTreeIterator(*this);
-	ReadIterator rightTreeIterator(rightExp);
+	ReadIterator rightTreeIterator(rightTreeOperand);
 	bool temporaryRootPointer = false;
-	while (((leftTreeIterator.ptr != NULLNODE) && (rightTreeIterator.ptr != NULLNODE)) && *leftTreeIterator < *rightTreeIterator) {
+	while (leftTreeIterator.ptr != NULLNODE && rightTreeIterator.ptr != NULLNODE && *leftTreeIterator < *rightTreeIterator) {
 		temp->build(*leftTreeIterator);
 		leftTreeIterator++;
 		temporaryRootPointer = true;
 	}
-	while ((leftTreeIterator.ptr != NULLNODE) && (rightTreeIterator.ptr != NULLNODE)) {
-		while (((leftTreeIterator.ptr != NULLNODE) && (rightTreeIterator.ptr != NULLNODE)) && *rightTreeIterator < *leftTreeIterator)
+	while (leftTreeIterator.ptr != NULLNODE && rightTreeIterator.ptr != NULLNODE) {
+		while (leftTreeIterator.ptr != NULLNODE && rightTreeIterator.ptr != NULLNODE && *rightTreeIterator < *leftTreeIterator)
 			rightTreeIterator++;
-		if (((leftTreeIterator.ptr != NULLNODE) && (rightTreeIterator.ptr != NULLNODE)) && (*rightTreeIterator != *leftTreeIterator)) {
+		if (leftTreeIterator.ptr != NULLNODE && rightTreeIterator.ptr != NULLNODE && *rightTreeIterator != *leftTreeIterator) {
 			temp->build(*leftTreeIterator);
 			temporaryRootPointer = true;
 		}
@@ -705,19 +718,6 @@ const TwoThreeTree& TwoThreeTree::operator /(const TwoThreeTree& rightExp) const
 	if (temporaryRootPointer)
 		temp->build(0);
 	return *temp;
-}
-
-const TwoThreeTree& TwoThreeTree::operator = (const TwoThreeTree& rightExp)
-{
-	ReadIterator rightTreeIterator(rightExp);
-	if (rightExp.root) {
-		while (rightTreeIterator.ptr != NULLNODE) {
-			build(*rightTreeIterator);
-			rightTreeIterator++;
-		}
-		build(0);
-	}
-	return *this;
 }
 
 int menu()
