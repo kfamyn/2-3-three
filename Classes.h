@@ -47,10 +47,11 @@ class TwoThreeTree {	//Класс 2-3-дерева
 	int count;
 	friend ReadIterator;
 public:
+	const TwoThreeTree& operator = (const TwoThreeTree&);
 	const TwoThreeTree& operator | (const TwoThreeTree&) const;
 	const TwoThreeTree& operator & (const TwoThreeTree&) const;
-	const TwoThreeTree& operator = (const TwoThreeTree&);
 	const TwoThreeTree& operator ^ (const TwoThreeTree&) const;
+	const TwoThreeTree& operator / (const TwoThreeTree&) const; // вместо \ (разность)
 	bool find(int num) const;
 	void display();    //Вывод на экран
 	int build(int);    //Построение дерева

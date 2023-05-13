@@ -600,7 +600,6 @@ const TwoThreeTree& TwoThreeTree::operator | (const TwoThreeTree& rightExp) cons
 	ReadIterator leftTreeIterator(*this);
 	ReadIterator rightTreeIterator(rightExp);
 	bool temporaryRootPointer = false;
-	Node* curL = nullptr, * curR = nullptr;
 	while ((leftTreeIterator.ptr != NULLNODE) || (rightTreeIterator.ptr != NULLNODE)) {
 		if (!temporaryRootPointer) temporaryRootPointer = true;
 		if (leftTreeIterator.ptr != NULLNODE && rightTreeIterator.ptr != NULLNODE)
@@ -642,7 +641,6 @@ const TwoThreeTree& TwoThreeTree::operator ^ (const TwoThreeTree& rightExp) cons
 	ReadIterator leftTreeIterator(*this);
 	ReadIterator rightTreeIterator(rightExp);
 	bool temporaryRootPointer = false;
-	Node* curL = nullptr, * curR = nullptr;
 	while ((leftTreeIterator.ptr != NULLNODE) || (rightTreeIterator.ptr != NULLNODE)) {
 		if (!temporaryRootPointer) temporaryRootPointer = true;
 		if (leftTreeIterator.ptr != NULLNODE && rightTreeIterator.ptr != NULLNODE)
@@ -671,6 +669,38 @@ const TwoThreeTree& TwoThreeTree::operator ^ (const TwoThreeTree& rightExp) cons
 					temp->build(*rightTreeIterator);
 					rightTreeIterator++;
 				}
+	}
+	if (temporaryRootPointer)
+		temp->build(0);
+	return *temp;
+}
+
+const TwoThreeTree& TwoThreeTree::operator /(const TwoThreeTree& rightExp) const
+{
+	int iteration;
+	TwoThreeTree* temp = new TwoThreeTree;
+	ReadIterator leftTreeIterator(*this);
+	ReadIterator rightTreeIterator(rightExp);
+	bool temporaryRootPointer = false;
+	while (((leftTreeIterator.ptr != NULLNODE) && (rightTreeIterator.ptr != NULLNODE)) && *leftTreeIterator < *rightTreeIterator) {
+		temp->build(*leftTreeIterator);
+		leftTreeIterator++;
+		temporaryRootPointer = true;
+	}
+	while ((leftTreeIterator.ptr != NULLNODE) && (rightTreeIterator.ptr != NULLNODE)) {
+		while (((leftTreeIterator.ptr != NULLNODE) && (rightTreeIterator.ptr != NULLNODE)) && *rightTreeIterator < *leftTreeIterator)
+			rightTreeIterator++;
+		if (((leftTreeIterator.ptr != NULLNODE) && (rightTreeIterator.ptr != NULLNODE)) && (*rightTreeIterator != *leftTreeIterator)) {
+			temp->build(*leftTreeIterator);
+			temporaryRootPointer = true;
+		}
+		if (rightTreeIterator.ptr != NULLNODE)
+			leftTreeIterator++;
+	}
+	while (leftTreeIterator.ptr != NULLNODE) {
+		temp->build(*leftTreeIterator);
+		temporaryRootPointer = true;
+		leftTreeIterator++;
 	}
 	if (temporaryRootPointer)
 		temp->build(0);
@@ -742,7 +772,7 @@ int main()
 			A.display();
 			B.display();*/
 			std::cout << "Результат E = (A^B-C) U D ∩ E))" << std::endl;
-			E = A ^ B;
+			E = A / B;
 			F = A & B;
 			E.display();
 			F.display();
