@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <conio.h>
 #include <stack>
-#include "Classes.h"
+#include "TwoThreeTree.h"
 
 //Имитация пустого узла для итератора чтения (защита от обращения к пустому узлу)
 Node NULL_NODE_IMITATION;
@@ -15,17 +15,20 @@ MAXCOL = 120, OFFSET[] = { 40, 24, 10, 4, 1 },
 MAXROW = FIRSTROW + 18,
 MAXOUT = FIRSTROW + 14, SHIFT = 2;
 char SCREEN[MAXROW * MAXCOL];
-int row = 0, col = 0;
+int row = 0, column = 0;
 //***********************************************************************
 //Функции работы с экраном
-void gotoxy(int c, int r) { row = r, col = c; }
+void goToPixel(int toRow, int toColumn) {
+	row = toRow;
+	column = toColumn;
+}
 
-void clrscr()
+void clearPixelBuffer()
 {
 	for (auto& x : SCREEN) x = '.';
 }
 
-void showscr()
+void showPixelBuffer()
 {
 	for (int i = 0; i < MAXROW; i++)
 		for (int j = 0; j < MAXCOL; j++)
@@ -52,33 +55,33 @@ void Node::erase() //удаление узла
 }
 //***********************************************************************
 //Вывод узла на экран и обход
-void Node::display(int lvl, int col)
+void Node::display(int lvl, int column)
 {
 	int row = FIRSTROW + lvl * 4;
-	this->out(row, col);
+	this->out(row, column);
 	if (down) {
-		down->display(lvl + 1, col - (OFFSET[lvl + 1]));
-		next->down->display(lvl + 1, col);
+		down->display(lvl + 1, column - (OFFSET[lvl + 1]));
+		next->down->display(lvl + 1, column);
 		if ((next->next) && (next->next->down))
-			next->next->down->display(lvl + 1, col + (OFFSET[lvl + 1]));
+			next->next->down->display(lvl + 1, column + (OFFSET[lvl + 1]));
 	}
 }
 //***********************************************************************
 //Вывод узла в массив screen в точку (x, y)
-void Node::out(int row, int col)
+void Node::out(int row, int column)
 {
-	if ((row > MAXROW) || (col < 1) || (col > MAXCOL)) return;
-	gotoxy(col, row);
+	if ((row > MAXROW) || (column < 1) || (column > MAXCOL)) return;
+	goToPixel(column, row);
 	if (row > MAXOUT) {
-		sprintf_s(SCREEN + row * MAXCOL + col, 4, "..."), col += 3;
+		sprintf_s(SCREEN + row * MAXCOL + column, 4, "..."), column += 3;
 		return;
 	}
-	sprintf_s(SCREEN + row * MAXCOL + col, 4, "%1d ", key);
+	sprintf_s(SCREEN + row * MAXCOL + column, 4, "%1d ", key);
 	if (next) {
-		sprintf_s(SCREEN + (row + 1) * MAXCOL + col + 1, 4, "%1d ", next->key);
+		sprintf_s(SCREEN + (row + 1) * MAXCOL + column + 1, 4, "%1d ", next->key);
 		if (next->next)
-			sprintf_s(SCREEN + (row + 2) * MAXCOL + col + 2, 4, "%1d ", next->next->key);
-		else sprintf_s(SCREEN + (row + 2) * MAXCOL + col + 2, 4, "@  ");
+			sprintf_s(SCREEN + (row + 2) * MAXCOL + column + 2, 4, "%1d ", next->next->key);
+		else sprintf_s(SCREEN + (row + 2) * MAXCOL + column + 2, 4, "@  ");
 	}
 }
 //***********************************************************************
@@ -94,7 +97,7 @@ ReadIterator::ReadIterator(const TwoThreeTree& tree) {
 		stack.push(std::make_pair(ptr, LEFT));
 		ptr = ptr->getDown();
 	}
-};
+}
 //***********************************************************************
 //Инкремент итератора чтения
 ReadIterator& ReadIterator::operator++() {
@@ -460,12 +463,12 @@ TwoThreeTree :: ~TwoThreeTree()
 //Вывод дерева на экран
 void TwoThreeTree::display()
 {
-	clrscr();
-	gotoxy(FIRSTCOL - OFFSET[0], FIRSTROW);
-	col += sprintf_s(SCREEN + row * MAXCOL + col, 11, "Дерево %c:", name);
+	clearPixelBuffer();
+	goToPixel(FIRSTCOL - OFFSET[0], FIRSTROW);
+	column += sprintf_s(SCREEN + row * MAXCOL + column, 11, "Дерево %c:", name);
 	if (root) root->display(0, FIRSTCOL - SHIFT);
-	else sprintf_s(SCREEN + row * MAXCOL + col, 9, "<Пусто!>");
-	showscr();
+	else sprintf_s(SCREEN + row * MAXCOL + column, 9, "<Пусто!>");
+	showPixelBuffer();
 }
 //***********************************************************************
 //Создание 2-3 дерева по возрастающей последовательности

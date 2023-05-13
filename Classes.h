@@ -1,5 +1,5 @@
-﻿#ifndef CLASSES_H
-#define CLASSES_H
+﻿#ifndef TWOTHREETREE_H
+#define TWOTHREETREE_H
 
 enum genSettings { genPower = 20, genMaxNum = 99 };
 enum directions { ROOT = 1, LEFT = 2, MIDDLE = 3, RIGHT = 4 };
