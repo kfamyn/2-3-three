@@ -1,5 +1,6 @@
 ﻿#ifndef CLASSES_H
 #define CLASSES_H
+
 enum genSettings { genPower = 20, genMaxNum = 99 };
 enum directions { ROOT = 1, LEFT = 2, MIDDLE = 3, RIGHT = 4 };
 struct ReadIterator;
@@ -49,6 +50,7 @@ public:
 	const TwoThreeTree& operator | (const TwoThreeTree&) const;
 	const TwoThreeTree& operator & (const TwoThreeTree&) const;
 	const TwoThreeTree& operator = (const TwoThreeTree&);
+	const TwoThreeTree& operator ^ (const TwoThreeTree&) const;
 	bool find(int num) const;
 	void display();    //Вывод на экран
 	int build(int);    //Построение дерева

@@ -89,7 +89,7 @@ ReadIterator::ReadIterator(const TwoThreeTree& tree) {
 		return;//Дерево пусто, выход
 	}
 	ptr = tree.root;	//Поиск крайнего левого элемента
-	stack.push(std::make_pair(ptr, 1));
+	stack.push(std::make_pair(ptr, ROOT));
 	while (ptr->getDown()) {
 		stack.push(std::make_pair(ptr, LEFT));
 		ptr = ptr->getDown();
@@ -98,7 +98,7 @@ ReadIterator::ReadIterator(const TwoThreeTree& tree) {
 //***********************************************************************
 //Инкремент итератора чтения
 ReadIterator& ReadIterator::operator++() {
-	int a;
+	int direction;
 	if (!ptr) { //Первое обращение?
 		return *this; //Не работает без предварительной установки на дерево
 	}
@@ -108,16 +108,16 @@ ReadIterator& ReadIterator::operator++() {
 			return (*this);
 		}
 		while (true) {	//Поиск очередного листа
-			a = stack.top().second;	//Шаг вверх
+			direction = stack.top().second;	//Шаг вверх
 			ptr = stack.top().first;
 			stack.pop();
-			switch (a) {
+			switch (direction) {
 			case ROOT:
 				ptr = NULLNODE;	//Вернулись к корню, конец
 				return (*this);
 				break;
 			case LEFT:
-				stack.push(std::make_pair(ptr, 3));	//Спуск по средней ветке
+				stack.push(std::make_pair(ptr, MIDDLE));	//Спуск по средней ветке
 				ptr = ptr->getNext()->getDown();
 				while (ptr->getDown()) {
 					stack.push(std::make_pair(ptr, LEFT));
@@ -125,9 +125,9 @@ ReadIterator& ReadIterator::operator++() {
 				}
 				return (*this);
 				break;
-			case 3:
+			case MIDDLE:
 				if (ptr->getNext()->getNext()) {
-					stack.push(std::make_pair(ptr, 4));	//Спуск по правой (если есть)
+					stack.push(std::make_pair(ptr, RIGHT));	//Спуск по правой (если есть)
 					ptr = ptr->getNext()->getNext()->getDown();
 					while (ptr->getDown()) {
 						stack.push(std::make_pair(ptr, LEFT));
@@ -136,8 +136,7 @@ ReadIterator& ReadIterator::operator++() {
 					return (*this);
 				}
 				break;
-			case 4:
-				//ptr = nullptr;	//Обошли всё поддерево, подъём
+			case RIGHT:	//Обошли всё поддерево, подъём
 				break;
 			}
 		}
@@ -637,6 +636,47 @@ const TwoThreeTree& TwoThreeTree::operator | (const TwoThreeTree& rightExp) cons
 	return *temp;
 }
 
+const TwoThreeTree& TwoThreeTree::operator ^ (const TwoThreeTree& rightExp) const
+{
+	TwoThreeTree* temp = new TwoThreeTree;
+	ReadIterator leftTreeIterator(*this);
+	ReadIterator rightTreeIterator(rightExp);
+	bool temporaryRootPointer = false;
+	Node* curL = nullptr, * curR = nullptr;
+	while ((leftTreeIterator.ptr != NULLNODE) || (rightTreeIterator.ptr != NULLNODE)) {
+		if (!temporaryRootPointer) temporaryRootPointer = true;
+		if (leftTreeIterator.ptr != NULLNODE && rightTreeIterator.ptr != NULLNODE)
+			if (*leftTreeIterator == *rightTreeIterator) {
+				leftTreeIterator++;
+				rightTreeIterator++;
+			}
+			else {
+				while ((leftTreeIterator.ptr != NULLNODE) && *leftTreeIterator < *rightTreeIterator) {
+					temp->build(*leftTreeIterator);
+					leftTreeIterator++;
+				}
+				while ((rightTreeIterator.ptr != NULLNODE) && *rightTreeIterator < *leftTreeIterator) {
+					temp->build(*rightTreeIterator);
+					rightTreeIterator++;
+				}
+			}
+		else
+			if ((leftTreeIterator.ptr != NULLNODE))
+				while ((leftTreeIterator.ptr != NULLNODE)) {
+					temp->build(*leftTreeIterator);
+					leftTreeIterator++;
+				}
+			else
+				while ((rightTreeIterator.ptr != NULLNODE)) {
+					temp->build(*rightTreeIterator);
+					rightTreeIterator++;
+				}
+	}
+	if (temporaryRootPointer)
+		temp->build(0);
+	return *temp;
+}
+
 const TwoThreeTree& TwoThreeTree::operator = (const TwoThreeTree& rightExp)
 {
 	ReadIterator rightTreeIterator(rightExp);
@@ -674,7 +714,7 @@ int main()
 	int pause;
 	do
 	{
-		TwoThreeTree A('A'), B('B'), C('C'), D('D'), E('E');
+		TwoThreeTree A('A'), B('B'), C('C'), D('D'), E('E'), F('F');
 		switch (pause = menu())
 		{
 		case 1:
@@ -702,8 +742,10 @@ int main()
 			A.display();
 			B.display();*/
 			std::cout << "Результат E = (A^B-C) U D ∩ E))" << std::endl;
-			E = A | B;
+			E = A ^ B;
+			F = A & B;
 			E.display();
+			F.display();
 			/*ReadIterator readIterator(A);
 			while (readIterator.ptr != NULLNODE) {
 				std::std::cout << *readIterator << " ";
