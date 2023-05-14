@@ -784,6 +784,15 @@ Sequence& Sequence::substitute(const Sequence& rightOperand, int fromPosition) {
 	return *this;
 }
 
+Sequence& Sequence::erase(int fromPosition, int toPosition) {
+	for (size_t index = fromPosition; index < toPosition; index++)
+	{
+		keysTree.erase(values[fromPosition]);
+		values.erase(values.begin() + fromPosition);
+	}
+	keysTree.display();
+	return *this;
+}
 
 int menu()
 {
@@ -827,6 +836,7 @@ int main()
 			system("cls");
 			Sequence T = { 2, 4, 5, 4, 7, 8, 10 };
 			Sequence D = { 1, 15, 6 };
+			T.erase(0, 2);
 			std::cout << "Для возврата в меню введите любое число, для выхода 0: ";
 			std::cin >> pause;
 		}
