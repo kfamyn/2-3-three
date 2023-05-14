@@ -759,7 +759,6 @@ Sequence::Sequence(std::initializer_list<int> valuesList) {
 		insertIterator = value;
 		values.push_back(value);
 	}
-	keysTree.display();
 }
 
 Sequence& Sequence::merge(const Sequence& rightOperand) {
@@ -769,7 +768,6 @@ Sequence& Sequence::merge(const Sequence& rightOperand) {
 		insertIterator = rightSequenceValues;
 		values.push_back(rightSequenceValues);
 	}
-	keysTree.display();
 	return *this;
 }
 
@@ -780,7 +778,6 @@ Sequence& Sequence::substitute(const Sequence& rightOperand, int fromPosition) {
 		insertIterator = rightOperand.values[i];
 		values.push_back(rightOperand.values[i]);
 	}
-	keysTree.display();
 	return *this;
 }
 
@@ -790,8 +787,11 @@ Sequence& Sequence::erase(int fromPosition, int toPosition) {
 		keysTree.erase(values[fromPosition]);
 		values.erase(values.begin() + fromPosition);
 	}
-	keysTree.display();
 	return *this;
+}
+
+void Sequence::printTree() {
+	keysTree.display();
 }
 
 int menu()
@@ -837,6 +837,7 @@ int main()
 			Sequence T = { 2, 4, 5, 4, 7, 8, 10 };
 			Sequence D = { 1, 15, 6 };
 			T.erase(0, 2);
+			T.printTree();
 			std::cout << "Для возврата в меню введите любое число, для выхода 0: ";
 			std::cin >> pause;
 		}
