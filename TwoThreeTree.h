@@ -101,7 +101,7 @@ class Sequence {
 public:
 	Sequence(std::initializer_list<int> valuesList);
 	Sequence& merge(const Sequence& rightOperand);
-	Sequence& subst(const Sequence& rightOperand, int fromPosition);
+	Sequence& substitute(const Sequence& rightOperand, int fromPosition);
 	Sequence& erase(int fromPosition, int toPosition);
 };
 #endif

@@ -746,7 +746,18 @@ Sequence& Sequence::merge(const Sequence& rightOperand) {
 		insertIterator = rightSequenceValues;
 		values.push_back(rightSequenceValues);
 	}
-	std::cout << "\nmerge:";
+	keysTree.display();
+	return *this;
+}
+
+Sequence& Sequence::substitute(const Sequence& rightOperand, int fromPosition) {
+	ReadIterator readIterator = keysTree.begin();
+	InsertIterator<TwoThreeTree> insertIterator = inserter(keysTree, readIterator);
+	int i = 0, size = keysTree.getSize();
+	for (size_t i = fromPosition; i < rightOperand.values.size(); ++i) {
+		insertIterator = rightOperand.values[i];
+		values.push_back(rightOperand.values[i]);
+	}
 	keysTree.display();
 	return *this;
 }
@@ -795,7 +806,7 @@ int main()
 			B.display();
 			Sequence T = { 2, 5, 4, 4, 7, 8, 10 };
 			Sequence D = { 1, 15, 6 };
-			T.merge(D);
+			T.substitute(D, 1);
 			std::cout << "Для возврата в меню введите любое число, для выхода 0: ";
 			std::cin >> pause;
 		}
