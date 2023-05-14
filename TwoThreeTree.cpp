@@ -731,12 +731,24 @@ ReadIterator TwoThreeTree::begin() {
 Sequence::Sequence(std::initializer_list<int> valuesList) {
 	ReadIterator readIterator = keysTree.begin();
 	InsertIterator<TwoThreeTree> insertIterator = inserter(keysTree, readIterator);
-	int i = 0;
 	for (int value : valuesList) {
 		insertIterator = value;
 		values.push_back(value);
 	}
 	keysTree.display();
+}
+
+Sequence& Sequence::merge(const Sequence& rightOperand) {
+	ReadIterator readIterator = keysTree.begin();
+	InsertIterator<TwoThreeTree> insertIterator = inserter(keysTree, readIterator);
+	int i = 0, size = keysTree.getSize();
+	for (int rightSequenceValues : rightOperand.values) {
+		insertIterator = rightSequenceValues;
+		values.push_back(rightSequenceValues);
+	}
+	std::cout << "\nmerge:";
+	keysTree.display();
+	return *this;
 }
 
 int menu()
@@ -781,7 +793,9 @@ int main()
 			system("cls");
 			A.display();
 			B.display();
-			Sequence T = { 2, 4, 5, 4, 7, 8, 10 };
+			Sequence T = { 2, 5, 4, 4, 7, 8, 10 };
+			Sequence D = { 1, 15, 6 };
+			T.merge(D);
 			std::cout << "Для возврата в меню введите любое число, для выхода 0: ";
 			std::cin >> pause;
 		}
