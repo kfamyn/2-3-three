@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <conio.h>
 #include <stack>
+#include <vector>
 #include "TwoThreeTree.h"
 
 //Имитация пустого узла для итератора чтения (защита от обращения к пустому узлу)
@@ -723,6 +724,21 @@ const TwoThreeTree& TwoThreeTree::operator /(const TwoThreeTree& rightTreeOperan
 	return *temp;
 }
 
+ReadIterator TwoThreeTree::begin() {
+	return ReadIterator(*this);
+}
+
+Sequence::Sequence(std::initializer_list<int> valuesList) {
+	ReadIterator readIterator = keysTree.begin();
+	InsertIterator<TwoThreeTree> insertIterator = inserter(keysTree, readIterator);
+	int i = 0;
+	for (int value : valuesList) {
+		insertIterator = value;
+		values.push_back(value);
+	}
+	keysTree.display();
+}
+
 int menu()
 {
 	int point;
@@ -765,25 +781,7 @@ int main()
 			system("cls");
 			A.display();
 			B.display();
-			/*A.insert(34, ReadIterator());
-			A.insert(35, ReadIterator());
-			B.insert(54, ReadIterator());
-			A.display();
-			B.display();
-			A.erase(34);
-			B.erase(54);
-			A.display();
-			B.display();*/
-			std::cout << "Результат E = (A^B-C) U D ∩ E))" << std::endl;
-			E = A / B;
-			F = A & B;
-			E.display();
-			F.display();
-			/*ReadIterator readIterator(A);
-			while (readIterator.ptr != NULLNODE) {
-				std::std::cout << *readIterator << " ";
-				readIterator++;
-			}*/
+			Sequence T = { 2, 4, 5, 4, 7, 8, 10 };
 			std::cout << "Для возврата в меню введите любое число, для выхода 0: ";
 			std::cin >> pause;
 		}
