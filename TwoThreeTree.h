@@ -22,7 +22,7 @@ public:
 	int& getKeyReference() { return key; };
 	Node* getNext() { if (next) return next; else return nullptr; }
 	Node* getDown() { if (down) return down; else return nullptr; }
-	~Node() { delete down; }
+	~Node() {}
 	//			if(next) delete next; };
 };
 
