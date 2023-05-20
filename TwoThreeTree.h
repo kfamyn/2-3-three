@@ -7,10 +7,10 @@ struct ReadIterator;
 class TwoThreeTree;
 class Node;
 
-class Node {	//Узел дерева
+class Node {
 private:
-	int key;		    //Ключ
-	Node* next, * down;
+	int key;	//Ключ
+	Node* next, * down;		//Указатели на узел справа и ниже
 	void erase();
 	void display(int, int);
 	void out(int, int);
@@ -23,7 +23,6 @@ public:
 	Node* getNext() { if (next) return next; else return nullptr; }
 	Node* getDown() { if (down) return down; else return nullptr; }
 	~Node() {}
-	//			if(next) delete next; };
 };
 
 struct ReadIterator : public std::iterator<std::forward_iterator_tag, int> {
@@ -78,7 +77,7 @@ class TwoThreeTree {	//Класс 2-3-дерева
 	friend ReadIterator;
 public:
 	using value_type = int;
-	TwoThreeTree(char n = 'T') : root(nullptr), height(0), name(n) {};
+	TwoThreeTree(char n = 'T') : root(nullptr), height(0), name(n), count(0) {};
 	const TwoThreeTree& operator = (const TwoThreeTree&);
 	const TwoThreeTree& operator | (const TwoThreeTree&) const;
 	const TwoThreeTree& operator & (const TwoThreeTree&) const;

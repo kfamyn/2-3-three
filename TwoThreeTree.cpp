@@ -490,9 +490,9 @@ void TwoThreeTree::display()
 {
 	clearPixelBuffer();
 	goToPixel(FIRSTCOL - OFFSET[0], FIRSTROW);
-	column += sprintf_s(SCREEN + row * MAXCOL + column, 11, "Дерево %c:", name);
+	column += sprintf_s(SCREEN + row * MAXCOL + column, 11, "Tree %c:", name);
 	if (root) root->display(0, FIRSTCOL - SHIFT);
-	else sprintf_s(SCREEN + row * MAXCOL + column, 9, "<Пусто!>");
+	else sprintf_s(SCREEN + row * MAXCOL + column, 9, "<Empty!>");
 	showPixelBuffer();
 }
 //***********************************************************************
@@ -502,7 +502,6 @@ int TwoThreeTree::build(int k)	// Приём возрастающей после
 	Node* nodePointerQ;				// и преобразование её в 2-3-дерево
 	static Node* nodePointerP;
 	static int count = 0;
-
 	if (k) { //Добавление в очередь
 		nodePointerQ = new Node(k);
 		if (root == nullptr) { //Первое обращение
@@ -800,13 +799,13 @@ int menu()
 	do {
 		std::cin.clear();
 		std::cin.sync();
-		std::cout << "Выберите пункт меню" << std::endl;
-		std::cout << "1 - Сгенерировать дерево" << std::endl;
-		std::cout << "0 - Выход" << std::endl;
+		std::cout << "Menu: " << std::endl;
+		std::cout << "1 - Generate trees and perform operations" << std::endl;
+		std::cout << "0 - Exit" << std::endl;
 		std::cout << ">";
 		std::cin >> point;
 		if (std::cin.fail())
-			std::cout << "Что-то пошло не так, выберите пункт меню повторно" << std::endl;
+			std::cout << "Something went wrong, please, try again: " << std::endl;
 	} while (std::cin.fail());
 	return point;
 }
@@ -815,7 +814,7 @@ int main()
 {
 	srand(time(NULL));
 	setlocale(LC_ALL, "RUS");
-	int pause;
+	int pause = 0;
 	do
 	{
 		TwoThreeTree A('A'), B('B'), C('C'), D('D'), E('E'), F('F');
@@ -823,22 +822,24 @@ int main()
 		{
 		case 1:
 			A.genSet(); B.genSet(); C.genSet(); D.genSet();
-			//std::cout << "Сгенерированные множества" << std::endl;
+			//std::cout << "Generated sets: " << std::endl;
 			break;
 		case 0:
 			std::cout << "End" << std::endl;
 			break;
 		default:
-			std::cout << "Такого пункта не существует, повторите ввод!" << std::endl;
+			std::cout << "Please, enter correct number: " << std::endl;
 		}
 		if (pause == 1)
 		{
 			system("cls");
 			Sequence T = { 2, 4, 5, 4, 7, 8, 10 };
-			Sequence D = { 1, 15, 6 };
 			T.erase(0, 2);
+			Sequence D = { 1, 15, 6 };
+			T.merge(D);
 			T.printTree();
-			std::cout << "Для возврата в меню введите любое число, для выхода 0: ";
+			A.display();
+			std::cout << "Enter 0 to exit, any number to continue: ";
 			std::cin >> pause;
 		}
 	} while (pause);
