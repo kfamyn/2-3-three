@@ -102,6 +102,6 @@ public:
 	Sequence& merge(const Sequence& rightOperand);
 	Sequence& substitute(const Sequence& rightOperand, int fromPosition);
 	Sequence& erase(int fromPosition, int toPosition);
-	void printTree();
+	void display();
 };
 #endif

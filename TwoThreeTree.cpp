@@ -789,8 +789,13 @@ Sequence& Sequence::erase(int fromPosition, int toPosition) {
 	return *this;
 }
 
-void Sequence::printTree() {
+void Sequence::display() {
 	keysTree.display();
+	std::cout << "Initial sequence: { ";
+	for (int value : values) {
+		std::cout << value << " ";
+	}
+	std::cout << "}" << std::endl;
 }
 
 int menu()
@@ -837,7 +842,7 @@ int main()
 			T.erase(0, 2);
 			Sequence D = { 1, 15, 6 };
 			T.merge(D);
-			T.printTree();
+			T.display();
 			A.display();
 			std::cout << "Enter 0 to exit, any number to continue: ";
 			std::cin >> pause;
