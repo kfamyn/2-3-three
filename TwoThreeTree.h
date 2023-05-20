@@ -84,9 +84,9 @@ public:
 	const TwoThreeTree& operator ^ (const TwoThreeTree&) const;
 	const TwoThreeTree& operator / (const TwoThreeTree&) const; // вместо \ (разность)
 	bool find(int num) const;
-	void display();    //Вывод на экран
-	int build(int);    //Построение дерева
-	void genSet();     //Генерация данных
+	void display() const;   //Вывод на экран
+	int build(int);         //Построение дерева
+	void genSet();			//Генерация данных
 	int erase(int k);
 	int getSize() const { return count; };
 	ReadIterator begin();

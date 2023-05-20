@@ -486,7 +486,7 @@ TwoThreeTree :: ~TwoThreeTree()
 }
 //***********************************************************************
 //Вывод дерева на экран
-void TwoThreeTree::display()
+void TwoThreeTree::display() const
 {
 	clearPixelBuffer();
 	goToPixel(FIRSTCOL - OFFSET[0], FIRSTROW);
@@ -826,7 +826,7 @@ int main()
 		switch (pause = menu())
 		{
 		case 1:
-			A.genSet(); B.genSet(); C.genSet(); D.genSet();
+			A.genSet(); B.genSet(); C.genSet(); D.genSet(); E.genSet();
 			//std::cout << "Generated sets: " << std::endl;
 			break;
 		case 0:
@@ -838,12 +838,28 @@ int main()
 		if (pause == 1)
 		{
 			system("cls");
-			Sequence T = { 2, 4, 5, 4, 7, 8, 10 };
+			/*Sequence T = {2, 4, 5, 4, 7, 8, 10};
+			T.display();
 			T.erase(0, 2);
+			std::cout << "Sequence T after erase method: \n";
+			T.display();
 			Sequence D = { 1, 15, 6 };
 			T.merge(D);
-			T.display();
+			std::cout << "Sequence T after merging with D: \n";
+			T.display();*/
 			A.display();
+			B.display();
+			C.display();
+			D.display();
+			E.display();
+			std::cout << "(A ^ B)\n";
+			(A ^ B).display();
+			std::cout << "((A ^ B) / C)\n";
+			((A ^ B) / C).display();
+			std::cout << "(((A ^ B) / C) & D)\n";
+			(((A ^ B) / C) & D).display();
+			std::cout << "((((A ^ B) / C) & D) | E)\n";
+			((((A ^ B) / C) & D) | E).display();
 			std::cout << "Enter 0 to exit, any number to continue: ";
 			std::cin >> pause;
 		}
